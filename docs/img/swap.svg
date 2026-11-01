@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 320" width="920" height="320">
+<style>
+text { font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; fill: #1B2430; font-size: 12px; }
+.lbl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; fill: #5A6675; }
+.ttl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #1B2430; }
+.box { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.5; }
+.box-soft { fill: #DCE8F3; stroke: #5B7FA5; stroke-width: 1.5; }
+.frame { fill: none; stroke: #5A6675; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.coil { fill: #FFFFFF; stroke: #6B4FA0; stroke-width: 2; }
+.part { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.6; }
+.fuse { fill: #FFFFFF; stroke: #B57D0C; stroke-width: 2; }
+.w { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.up { stroke: #B8402F; } .down { stroke: #2F6CB0; } .pwr { stroke: #B57D0C; } .gnd { stroke: #4A5563; } .trig { stroke: #6B4FA0; } .acc { stroke: #5B7FA5; }
+.dot { stroke: none; }
+.f-up { fill: #B8402F; } .f-down { fill: #2F6CB0; } .f-pwr { fill: #B57D0C; } .f-gnd { fill: #4A5563; } .f-fg { fill: #1B2430; } .f-trig { fill: #6B4FA0; } .f-acc { fill: #5B7FA5; }
+.mech { fill: none; stroke: #5A6675; stroke-width: 1.4; stroke-dasharray: 4 4; }
+.ink { fill: none; stroke: #1B2430; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ghost { fill: none; stroke: #5A6675; stroke-width: 1.6; stroke-dasharray: 3 3; stroke-linecap: round; }
+.axis { fill: none; stroke: #C9D2DC; stroke-width: 1.2; }
+.link { fill: none; stroke: #5B7FA5; stroke-width: 2; stroke-dasharray: 7 5; }
+.t-up { fill: #B8402F; } .t-down { fill: #2F6CB0; } .t-pwr { fill: #B57D0C; } .t-trig { fill: #6B4FA0; }
+</style>
+<rect x="0" y="0" width="920" height="320" fill="#FFFFFF"/>
+<title>The DPDT swap relay. Off: the retractor's UP input gets the switch's UP line and DOWN gets DOWN. On: the two are crossed. Each common only ever touches one harness line.</title>
+<text x="10" y="24" class="ttl">Relay off: stock</text>
+<text x="10" y="52" class="lbl">2 · UP (BK/R)</text>
+<text x="10" y="132" class="lbl">1 · DOWN (BK/BL)</text>
+<path class="w up" d="M10 60 H230"/>
+<path class="w up" d="M150 60 V132 a8 8 0 0 1 0 16 V220 H230"/>
+<circle class="dot f-up" cx="150" cy="60" r="4.5"/>
+<path class="w down" d="M10 140 H190 M190 100 V180 M190 100 H230 M190 180 H230"/>
+<circle class="dot f-down" cx="190" cy="140" r="4.5"/>
+<circle class="dot f-up" cx="234" cy="60" r="4"/>
+<text x="222" y="53" text-anchor="end" style="font-size:11px">NC</text>
+<circle class="dot f-down" cx="234" cy="100" r="4"/>
+<text x="222" y="93" text-anchor="end" style="font-size:11px">NO</text>
+<circle class="dot f-down" cx="234" cy="180" r="4"/>
+<text x="222" y="173" text-anchor="end" style="font-size:11px">NC</text>
+<circle class="dot f-up" cx="234" cy="220" r="4"/>
+<text x="222" y="213" text-anchor="end" style="font-size:11px">NO</text>
+<path class="ink" d="M300 80 L238 62"/>
+<path class="ghost" d="M300 80 L238 98"/>
+<circle class="dot f-fg" cx="300" cy="80" r="4"/>
+<text x="312" y="71" class="lbl">3 · retractor UP in</text>
+<path class="ink" d="M300 200 L238 182"/>
+<path class="ghost" d="M300 200 L238 218"/>
+<circle class="dot f-fg" cx="300" cy="200" r="4"/>
+<text x="312" y="191" class="lbl">4 · retractor DOWN in</text>
+<path class="w up" d="M300 80 H440"/>
+<path class="w down" d="M300 200 H440"/>
+<rect class="coil" x="250" y="258" width="100" height="16"/>
+<path class="mech" d="M275 258 L270 210 M270 190 L268 92"/>
+<text x="360" y="271" class="lbl">coil off</text>
+<text x="10" y="306" class="lbl">Both lamps follow the switch.</text>
+<path class="axis" d="M455 10 V310"/>
+<text x="480" y="24" class="ttl">Relay on: commands crossed</text>
+<text x="480" y="52" class="lbl">2 · UP (BK/R)</text>
+<text x="480" y="132" class="lbl">1 · DOWN (BK/BL)</text>
+<path class="w up" d="M480 60 H700"/>
+<path class="w up" d="M620 60 V132 a8 8 0 0 1 0 16 V220 H700"/>
+<circle class="dot f-up" cx="620" cy="60" r="4.5"/>
+<path class="w down" d="M480 140 H660 M660 100 V180 M660 100 H700 M660 180 H700"/>
+<circle class="dot f-down" cx="660" cy="140" r="4.5"/>
+<circle class="dot f-up" cx="704" cy="60" r="4"/>
+<text x="692" y="53" text-anchor="end" style="font-size:11px">NC</text>
+<circle class="dot f-down" cx="704" cy="100" r="4"/>
+<text x="692" y="93" text-anchor="end" style="font-size:11px">NO</text>
+<circle class="dot f-down" cx="704" cy="180" r="4"/>
+<text x="692" y="173" text-anchor="end" style="font-size:11px">NC</text>
+<circle class="dot f-up" cx="704" cy="220" r="4"/>
+<text x="692" y="213" text-anchor="end" style="font-size:11px">NO</text>
+<path class="ink" d="M770 80 L708 98"/>
+<path class="ghost" d="M770 80 L708 62"/>
+<circle class="dot f-fg" cx="770" cy="80" r="4"/>
+<text x="782" y="71" class="lbl">3 · retractor UP in</text>
+<path class="ink" d="M770 200 L708 218"/>
+<path class="ghost" d="M770 200 L708 182"/>
+<circle class="dot f-fg" cx="770" cy="200" r="4"/>
+<text x="782" y="191" class="lbl">4 · retractor DOWN in</text>
+<path class="w down" d="M770 80 H910"/>
+<path class="w up" d="M770 200 H910"/>
+<rect class="coil" x="720" y="258" width="100" height="16"/>
+<path class="mech" d="M745 258 L740 210 M740 190 L738 92"/>
+<text x="830" y="271" class="lbl">coil on</text>
+<text x="480" y="306" class="lbl">This lamp gets the other command.</text>
+</svg>

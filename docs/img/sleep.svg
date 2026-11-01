@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 170" width="820" height="170">
+<style>
+text { font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; fill: #1B2430; font-size: 12px; }
+.lbl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; fill: #5A6675; }
+.ttl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #1B2430; }
+.box { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.5; }
+.box-soft { fill: #DCE8F3; stroke: #5B7FA5; stroke-width: 1.5; }
+.frame { fill: none; stroke: #5A6675; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.coil { fill: #FFFFFF; stroke: #6B4FA0; stroke-width: 2; }
+.part { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.6; }
+.fuse { fill: #FFFFFF; stroke: #B57D0C; stroke-width: 2; }
+.w { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.up { stroke: #B8402F; } .down { stroke: #2F6CB0; } .pwr { stroke: #B57D0C; } .gnd { stroke: #4A5563; } .trig { stroke: #6B4FA0; } .acc { stroke: #5B7FA5; }
+.dot { stroke: none; }
+.f-up { fill: #B8402F; } .f-down { fill: #2F6CB0; } .f-pwr { fill: #B57D0C; } .f-gnd { fill: #4A5563; } .f-fg { fill: #1B2430; } .f-trig { fill: #6B4FA0; } .f-acc { fill: #5B7FA5; }
+.mech { fill: none; stroke: #5A6675; stroke-width: 1.4; stroke-dasharray: 4 4; }
+.ink { fill: none; stroke: #1B2430; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ghost { fill: none; stroke: #5A6675; stroke-width: 1.6; stroke-dasharray: 3 3; stroke-linecap: round; }
+.axis { fill: none; stroke: #C9D2DC; stroke-width: 1.2; }
+.link { fill: none; stroke: #5B7FA5; stroke-width: 2; stroke-dasharray: 7 5; }
+.t-up { fill: #B8402F; } .t-down { fill: #2F6CB0; } .t-pwr { fill: #B57D0C; } .t-trig { fill: #6B4FA0; }
+</style>
+<rect x="0" y="0" width="820" height="170" fill="#FFFFFF"/>
+<title>Module states: deep sleep wakes to awake on a headlamp switch change; awake returns to sleep after 15 minutes without a command; awake goes to running on a command and back when done, stopped or capped.</title>
+        <defs><marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="f-acc" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+        <rect class="box" x="20" y="70" width="200" height="60" rx="2"/>
+        <text class="ttl" x="120" y="96" text-anchor="middle">Deep sleep</text>
+        <text class="lbl" x="120" y="116" text-anchor="middle">relay off · radio off</text>
+        <rect class="box-soft" x="310" y="70" width="200" height="60" rx="2"/>
+        <text class="ttl" x="410" y="96" text-anchor="middle">Awake</text>
+        <text class="lbl" x="410" y="116" text-anchor="middle">BLE · remote · ESP-NOW</text>
+        <rect class="box" x="600" y="70" width="200" height="60" rx="2"/>
+        <text class="ttl" x="700" y="96" text-anchor="middle">Running</text>
+        <text class="lbl" x="700" y="116" text-anchor="middle">wink or alternate</text>
+        <path class="w acc" d="M220 88 H306" marker-end="url(#arr2)"/>
+        <path class="w acc" d="M310 112 H224" marker-end="url(#arr2)"/>
+        <path class="w acc" d="M510 88 H596" marker-end="url(#arr2)"/>
+        <path class="w acc" d="M600 112 H514" marker-end="url(#arr2)"/>
+        <text class="lbl" x="265" y="56" text-anchor="middle">headlamp switch changes</text>
+        <text class="lbl" x="265" y="152" text-anchor="middle">15 min without a command</text>
+        <text class="lbl" x="555" y="56" text-anchor="middle">command (phone or remote)</text>
+        <text class="lbl" x="555" y="152" text-anchor="middle">done · STOP · cap reached</text>
+      </svg>

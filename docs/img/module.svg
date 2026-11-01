@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 560" width="940" height="560">
+<style>
+text { font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; fill: #1B2430; font-size: 12px; }
+.lbl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; fill: #5A6675; }
+.ttl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #1B2430; }
+.box { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.5; }
+.box-soft { fill: #DCE8F3; stroke: #5B7FA5; stroke-width: 1.5; }
+.frame { fill: none; stroke: #5A6675; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.coil { fill: #FFFFFF; stroke: #6B4FA0; stroke-width: 2; }
+.part { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.6; }
+.fuse { fill: #FFFFFF; stroke: #B57D0C; stroke-width: 2; }
+.w { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.up { stroke: #B8402F; } .down { stroke: #2F6CB0; } .pwr { stroke: #B57D0C; } .gnd { stroke: #4A5563; } .trig { stroke: #6B4FA0; } .acc { stroke: #5B7FA5; }
+.dot { stroke: none; }
+.f-up { fill: #B8402F; } .f-down { fill: #2F6CB0; } .f-pwr { fill: #B57D0C; } .f-gnd { fill: #4A5563; } .f-fg { fill: #1B2430; } .f-trig { fill: #6B4FA0; } .f-acc { fill: #5B7FA5; }
+.mech { fill: none; stroke: #5A6675; stroke-width: 1.4; stroke-dasharray: 4 4; }
+.ink { fill: none; stroke: #1B2430; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ghost { fill: none; stroke: #5A6675; stroke-width: 1.6; stroke-dasharray: 3 3; stroke-linecap: round; }
+.axis { fill: none; stroke: #C9D2DC; stroke-width: 1.2; }
+.link { fill: none; stroke: #5B7FA5; stroke-width: 2; stroke-dasharray: 7 5; }
+.t-up { fill: #B8402F; } .t-down { fill: #2F6CB0; } .t-pwr { fill: #B57D0C; } .t-trig { fill: #6B4FA0; }
+</style>
+<rect x="0" y="0" width="940" height="560" fill="#FFFFFF"/>
+<title>Module rev C: lead 5 through the M7 reverse diode and TVS to the +12 V rail; LMR16006X buck to 3.3 V; 1 M / 68k supply divider to GPIO3; UP and DOWN lines through divider, filter, zener and 2N7002 buffers to GPIO0 and GPIO1 (active low); GPIO10 drives the relay coil through a 2.2k resistor and an MMBTA06 NPN with 100k pull-down and flyback diode; GPIO7 status LED; GPIO6 side jumper.</title>
+<rect class="box" x="20" y="50" width="96" height="36" rx="2"/>
+<text x="68" y="72" class="t-pwr" text-anchor="middle">5 BK/W</text>
+<rect class="box" x="20" y="302" width="96" height="36" rx="2"/>
+<text x="68" y="324" class="t-up" text-anchor="middle">2 UP</text>
+<rect class="box" x="20" y="382" width="96" height="36" rx="2"/>
+<text x="68" y="404" class="t-down" text-anchor="middle">1 DOWN</text>
+<rect class="box" x="20" y="492" width="96" height="36" rx="2"/>
+<text x="68" y="514" text-anchor="middle">6 BK</text>
+<text x="20" y="30" class="lbl">6-wire lead (J1)</text>
+<path class="w pwr" d="M116 68 H140"/>
+<path class="f-pwr" d="M140 58 L158 68 L140 78 Z"/>
+<path class="w pwr" d="M160 57 V79"/>
+<text x="149" y="100" class="lbl" text-anchor="middle">M7</text>
+<path class="w pwr" d="M160 68 H890"/>
+<text x="500" y="58" class="lbl" text-anchor="middle">+12 V rail</text>
+<circle class="dot f-pwr" cx="200" cy="68" r="4.5"/>
+<path class="w pwr" d="M200 68 V92"/>
+<path class="f-pwr" d="M190 108 L200 92 L210 108 Z"/>
+<path class="w pwr" d="M190 92 H210"/>
+<path class="w pwr" d="M200 108 V116"/>
+<path class="w gnd" d="M200 116 V124"/>
+<path class="ink" d="M190 124 H210 M194 129 H206 M198 134 H202"/>
+<text x="216" y="104" class="lbl">TVS</text>
+<circle class="dot f-pwr" cx="260" cy="68" r="4.5"/>
+<path class="w pwr" d="M260 68 V96"/>
+<path class="ink" d="M248 96 H272 M248 104 H272"/>
+<path class="w gnd" d="M260 104 V116"/>
+<path class="w gnd" d="M260 116 V124"/>
+<path class="ink" d="M250 124 H270 M254 129 H266 M258 134 H262"/>
+<text x="276" y="104" class="lbl">22 µF + ceramics</text>
+<circle class="dot f-pwr" cx="350" cy="68" r="4.5"/>
+<path class="w pwr" d="M350 68 V205"/>
+<rect class="box" x="290" y="205" width="130" height="56" rx="2"/>
+<text x="355" y="228" text-anchor="middle">LMR16006X</text>
+<text x="355" y="248" class="lbl" text-anchor="middle">buck → 3.3 V</text>
+<path class="w gnd" d="M355 261 V268"/>
+<path class="w gnd" d="M355 268 V276"/>
+<path class="ink" d="M345 276 H365 M349 281 H361 M353 286 H357"/>
+<path class="ink" d="M420 235 H560"/>
+<text x="490" y="228" class="lbl" text-anchor="middle">3.3 V</text>
+<circle class="dot f-pwr" cx="480" cy="68" r="4.5"/>
+<path class="w pwr" d="M480 68 V84"/>
+<rect class="part" x="473" y="84" width="14" height="36"/>
+<path class="ink" d="M480 120 V150 H560"/>
+<text x="492" y="106" class="lbl">1 M</text>
+<circle class="dot f-fg" cx="480" cy="150" r="4.5"/>
+<path class="ink" d="M480 150 V160"/>
+<rect class="part" x="473" y="160" width="14" height="28"/>
+<path class="w gnd" d="M480 188 V192"/>
+<path class="w gnd" d="M480 192 V200"/>
+<path class="ink" d="M470 200 H490 M474 205 H486 M478 210 H482"/>
+<text x="492" y="180" class="lbl">68k</text>
+<rect class="box-soft" x="560" y="120" width="180" height="380" rx="2"/>
+<text x="650" y="190" class="ttl" text-anchor="middle">ESP32-C3</text>
+<text x="650" y="210" class="lbl" text-anchor="middle">WROOM-02</text>
+<text x="570" y="154">GPIO3</text>
+<text x="570" y="239">3V3</text>
+<text x="570" y="324">GPIO0</text>
+<text x="570" y="404">GPIO1</text>
+<text x="570" y="454">GPIO6</text>
+<text x="570" y="490">GND</text>
+<text x="730" y="324" text-anchor="end">GPIO10</text>
+<text x="730" y="404" text-anchor="end">GPIO7</text>
+<text x="730" y="454" text-anchor="end">USB</text>
+<path class="w up" d="M116 320 H150"/>
+<rect class="part" x="150" y="294" width="150" height="52" rx="2"/>
+<text x="225" y="314" class="lbl" text-anchor="middle">330k / 220k, 100 nF</text>
+<text x="225" y="334" class="lbl" text-anchor="middle">12 V zener clamp</text>
+<path class="ink" d="M300 320 H330"/>
+<rect class="part" x="330" y="302" width="80" height="36" rx="2"/>
+<text x="370" y="324" text-anchor="middle">2N7002</text>
+<path class="ink" d="M410 320 H560"/>
+<circle class="dot f-fg" cx="500" cy="320" r="4.5"/>
+<path class="ink" d="M500 320 V308"/>
+<rect class="part" x="493" y="280" width="14" height="28"/>
+<path class="ink" d="M500 280 V272"/>
+<text x="488" y="296" class="lbl" text-anchor="end">330k</text>
+<path class="w down" d="M116 400 H150"/>
+<rect class="part" x="150" y="374" width="150" height="52" rx="2"/>
+<text x="225" y="394" class="lbl" text-anchor="middle">330k / 220k, 100 nF</text>
+<text x="225" y="414" class="lbl" text-anchor="middle">12 V zener clamp</text>
+<path class="ink" d="M300 400 H330"/>
+<rect class="part" x="330" y="382" width="80" height="36" rx="2"/>
+<text x="370" y="404" text-anchor="middle">2N7002</text>
+<path class="ink" d="M410 400 H560"/>
+<circle class="dot f-fg" cx="500" cy="400" r="4.5"/>
+<path class="ink" d="M500 400 V388"/>
+<rect class="part" x="493" y="360" width="14" height="28"/>
+<path class="ink" d="M500 360 V352"/>
+<text x="488" y="376" class="lbl" text-anchor="end">330k</text>
+<text x="150" y="446" class="lbl">line live → pin low (active low); wakes the chip</text>
+<path class="ink" d="M500 272 H520 M500 352 H520"/>
+<text x="524" y="276" class="lbl">3.3 V</text>
+<text x="524" y="356" class="lbl">3.3 V</text>
+<path class="ink" d="M560 450 H530"/>
+<rect class="part" x="508" y="443" width="10" height="14"/><rect class="part" x="520" y="443" width="10" height="14"/>
+<path class="w gnd" d="M508 450 H496 V458"/>
+<path class="w gnd" d="M496 458 V466"/>
+<path class="ink" d="M486 466 H506 M490 471 H502 M494 476 H498"/>
+<text x="150" y="480" class="lbl">JP1 open = LH (master), bridged = RH (slave)</text>
+<path class="w gnd" d="M560 486 H546 V494"/>
+<path class="w gnd" d="M546 494 V502"/>
+<path class="ink" d="M536 502 H556 M540 507 H552 M544 512 H548"/>
+<path class="w trig" d="M740 320 H752"/>
+<rect class="part" x="752" y="313" width="36" height="14"/>
+<path class="w trig" d="M788 320 H812"/>
+<text x="770" y="304" class="lbl" text-anchor="middle">2.2k</text>
+<circle class="dot f-trig" cx="800" cy="320" r="4.5"/>
+<path class="w trig" d="M800 320 V340"/>
+<rect class="part" x="793" y="340" width="14" height="26"/>
+<path class="w gnd" d="M800 366 V372"/>
+<path class="w gnd" d="M800 372 V380"/>
+<path class="ink" d="M790 380 H810 M794 385 H806 M798 390 H802"/>
+<text x="790" y="360" class="lbl" text-anchor="end">100k</text>
+<rect class="part" x="812" y="300" width="80" height="40" rx="2"/>
+<text x="852" y="324" text-anchor="middle">MMBTA06</text>
+<path class="w gnd" d="M852 340 V346"/>
+<path class="w gnd" d="M852 346 V354"/>
+<path class="ink" d="M842 354 H862 M846 359 H858 M850 364 H854"/>
+<path class="w pwr" d="M890 68 H905"/>
+<path class="w pwr" d="M852 68 V140"/>
+<circle class="dot f-pwr" cx="852" cy="68" r="4.5"/>
+<rect class="coil" x="837" y="140" width="30" height="60"/>
+<path class="w trig" d="M852 200 V300"/>
+<text x="830" y="166" text-anchor="end">K1</text>
+<text x="830" y="184" class="lbl" text-anchor="end">coil</text>
+<path class="w pwr" d="M905 68 V160"/>
+<path class="f-fg" d="M895 180 L905 160 L915 180 Z"/>
+<path class="ink" d="M895 160 H915"/>
+<path class="w trig" d="M905 180 V240 H852"/>
+<circle class="dot f-trig" cx="852" cy="240" r="4.5"/>
+<text x="905" y="262" class="lbl" text-anchor="middle">flyback</text>
+<text x="828" y="112" class="lbl" text-anchor="end">K1 contacts: lead 1–4, see the swap figure</text>
+<path class="ink" d="M740 400 H760"/>
+<rect class="part" x="760" y="393" width="36" height="14"/>
+<path class="ink" d="M796 400 H812"/>
+<path class="f-fg" d="M812 390 L830 400 L812 410 Z"/>
+<path class="ink" d="M832 390 V410"/>
+<path class="w gnd" d="M832 400 H850 V410"/>
+<path class="w gnd" d="M850 410 V418"/>
+<path class="ink" d="M840 418 H860 M844 423 H856 M848 428 H852"/>
+<text x="778" y="386" class="lbl" text-anchor="middle">1k</text>
+<text x="870" y="404" class="lbl">LED</text>
+<path class="ink" d="M740 450 H770"/>
+<text x="778" y="455" class="lbl">USB + J2 pads</text>
+<text x="778" y="475" class="lbl">(back side, flashing)</text>
+<text x="130" y="514" class="lbl">ground symbols = lead 6</text>
+<path class="w gnd" d="M116 510 H124"/>
+</svg>

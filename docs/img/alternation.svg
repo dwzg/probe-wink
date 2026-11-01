@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 790 325" width="790" height="325">
+<style>
+text { font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; fill: #1B2430; font-size: 12px; }
+.lbl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; fill: #5A6675; }
+.ttl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #1B2430; }
+.box { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.5; }
+.box-soft { fill: #DCE8F3; stroke: #5B7FA5; stroke-width: 1.5; }
+.frame { fill: none; stroke: #5A6675; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.coil { fill: #FFFFFF; stroke: #6B4FA0; stroke-width: 2; }
+.part { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.6; }
+.fuse { fill: #FFFFFF; stroke: #B57D0C; stroke-width: 2; }
+.w { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.up { stroke: #B8402F; } .down { stroke: #2F6CB0; } .pwr { stroke: #B57D0C; } .gnd { stroke: #4A5563; } .trig { stroke: #6B4FA0; } .acc { stroke: #5B7FA5; }
+.dot { stroke: none; }
+.f-up { fill: #B8402F; } .f-down { fill: #2F6CB0; } .f-pwr { fill: #B57D0C; } .f-gnd { fill: #4A5563; } .f-fg { fill: #1B2430; } .f-trig { fill: #6B4FA0; } .f-acc { fill: #5B7FA5; }
+.mech { fill: none; stroke: #5A6675; stroke-width: 1.4; stroke-dasharray: 4 4; }
+.ink { fill: none; stroke: #1B2430; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ghost { fill: none; stroke: #5A6675; stroke-width: 1.6; stroke-dasharray: 3 3; stroke-linecap: round; }
+.axis { fill: none; stroke: #C9D2DC; stroke-width: 1.2; }
+.link { fill: none; stroke: #5B7FA5; stroke-width: 2; stroke-dasharray: 7 5; }
+.t-up { fill: #B8402F; } .t-down { fill: #2F6CB0; } .t-pwr { fill: #B57D0C; } .t-trig { fill: #6B4FA0; }
+</style>
+<rect x="0" y="0" width="790" height="325" fill="#FFFFFF"/>
+<title>Alternation: LH and RH relays energize in turn every period P; each lamp rises while its relay is on and falls when it drops; at the cap all relays go off and both lamps return down.</title>
+        <text class="lbl" x="310" y="12" text-anchor="middle">alternation · firmware cap 10 s</text>
+        <path class="axis" d="M110 20 V30 M510 20 V30 M110 25 H510"/>
+        <path class="mech" d="M510 36 V290"/>
+        <text class="lbl" x="520" y="12">stop: both relays off</text>
+        <text class="lbl" x="0" y="76">LH relay</text>
+        <text class="lbl" x="0" y="126">RH relay</text>
+        <text class="lbl" x="0" y="194">LH lamp</text>
+        <text class="lbl" x="0" y="264">RH lamp</text>
+        <path class="axis" d="M90 210 H740 M90 280 H740 M90 170 H740 M90 240 H740"/>
+        <text class="lbl" x="746" y="174">up</text><text class="lbl" x="746" y="214">down</text>
+        <text class="lbl" x="746" y="244">up</text><text class="lbl" x="746" y="284">down</text>
+        <path class="w trig" d="M90 84 H110 V60 H210 V84 H310 V60 H410 V84 H740"/>
+        <path class="w trig" d="M90 134 H210 V110 H310 V134 H410 V110 H510 V134 H740"/>
+        <path class="w acc" d="M90 210 H110 L180 170 H210 L280 210 H310 L380 170 H410 L480 210 H740"/>
+        <path class="w acc" d="M90 280 H210 L280 240 H310 L380 280 H410 L480 240 H510 L580 280 H740"/>
+        <path class="axis" d="M110 218 V226 M180 218 V226 M110 222 H180"/>
+        <text x="145" y="236" text-anchor="middle">T</text>
+        <path class="axis" d="M110 296 V304 M210 296 V304 M110 300 H210"/>
+        <text x="160" y="318" text-anchor="middle">P</text>
+      </svg>

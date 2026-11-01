@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 330" width="780" height="330">
+<style>
+text { font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; fill: #1B2430; font-size: 12px; }
+.lbl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; fill: #5A6675; }
+.ttl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #1B2430; }
+.box { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.5; }
+.box-soft { fill: #DCE8F3; stroke: #5B7FA5; stroke-width: 1.5; }
+.frame { fill: none; stroke: #5A6675; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.coil { fill: #FFFFFF; stroke: #6B4FA0; stroke-width: 2; }
+.part { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.6; }
+.fuse { fill: #FFFFFF; stroke: #B57D0C; stroke-width: 2; }
+.w { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.up { stroke: #B8402F; } .down { stroke: #2F6CB0; } .pwr { stroke: #B57D0C; } .gnd { stroke: #4A5563; } .trig { stroke: #6B4FA0; } .acc { stroke: #5B7FA5; }
+.dot { stroke: none; }
+.f-up { fill: #B8402F; } .f-down { fill: #2F6CB0; } .f-pwr { fill: #B57D0C; } .f-gnd { fill: #4A5563; } .f-fg { fill: #1B2430; } .f-trig { fill: #6B4FA0; } .f-acc { fill: #5B7FA5; }
+.mech { fill: none; stroke: #5A6675; stroke-width: 1.4; stroke-dasharray: 4 4; }
+.ink { fill: none; stroke: #1B2430; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ghost { fill: none; stroke: #5A6675; stroke-width: 1.6; stroke-dasharray: 3 3; stroke-linecap: round; }
+.axis { fill: none; stroke: #C9D2DC; stroke-width: 1.2; }
+.link { fill: none; stroke: #5B7FA5; stroke-width: 2; stroke-dasharray: 7 5; }
+.t-up { fill: #B8402F; } .t-down { fill: #2F6CB0; } .t-pwr { fill: #B57D0C; } .t-trig { fill: #6B4FA0; }
+</style>
+<rect x="0" y="0" width="780" height="330" fill="#FFFFFF"/>
+<title>Retractor internals: diode-isolated UP and DOWN inputs pass through a cam switch to the relay coil; the relay connects the motor to BK/W power or to ground for braking.</title>
+        <rect class="frame" x="160" y="16" width="600" height="300"/>
+        <text class="lbl" x="176" y="38">Inside one retractor · shown with the lamp DOWN</text>
+        <rect class="box" x="154" y="64" width="12" height="12"/><text x="144" y="74" text-anchor="end" class="t-pwr">BK/W</text>
+        <rect class="box" x="154" y="144" width="12" height="12"/><text x="144" y="154" text-anchor="end" class="t-up">BK/R · UP</text>
+        <rect class="box" x="154" y="204" width="12" height="12"/><text x="144" y="214" text-anchor="end" class="t-down">BK/BL · DOWN</text>
+        <rect class="box" x="154" y="274" width="12" height="12"/><text x="144" y="284" text-anchor="end">BK · ground</text>
+        <path class="w gnd" d="M166 280 H710"/>
+        <path class="w pwr" d="M166 70 H610 V100"/>
+        <circle class="dot f-pwr" cx="610" cy="100" r="4"/>
+        <text class="lbl" x="618" y="94">run</text>
+        <circle class="dot f-gnd" cx="710" cy="100" r="4"/>
+        <path class="w gnd" d="M710 100 V280"/>
+        <text class="lbl" x="718" y="94">brake</text>
+        <circle class="dot f-fg" cx="660" cy="140" r="4"/>
+        <path class="ink" d="M660 140 L707 104"/>
+        <path class="ghost" d="M660 140 L613 104"/>
+        <path class="ink" d="M660 140 V180"/>
+        <circle class="part" cx="660" cy="202" r="22"/>
+        <text x="660" y="207" text-anchor="middle" style="font-weight:600">M</text>
+        <path class="ink" d="M660 224 V280"/>
+        <circle class="dot f-gnd" cx="660" cy="280" r="4"/>
+        <path class="w up" d="M166 150 H234"/>
+        <polygon class="f-up" points="234,142 234,158 248,150"/>
+        <path class="w up" d="M249 141 V159"/>
+        <path class="w up" d="M249 150 H340"/>
+        <circle class="dot f-up" cx="340" cy="150" r="4"/>
+        <text class="lbl" x="326" y="138">UP</text>
+        <path class="w down" d="M166 210 H234"/>
+        <polygon class="f-down" points="234,202 234,218 248,210"/>
+        <path class="w down" d="M249 201 V219"/>
+        <path class="w down" d="M249 210 H340"/>
+        <circle class="dot f-down" cx="340" cy="210" r="4"/>
+        <text class="lbl" x="318" y="234">DOWN</text>
+        <circle class="dot f-fg" cx="400" cy="180" r="4"/>
+        <path class="ink" d="M400 180 L344 153"/>
+        <path class="ghost" d="M400 180 L344 207"/>
+        <text class="lbl" x="372" y="118">cam switch</text>
+        <path class="ink" d="M400 180 H480 V196"/>
+        <rect class="part" x="468" y="196" width="24" height="50"/>
+        <path class="ink" d="M472 206 H488 M472 216 H488 M472 226 H488 M472 236 H488"/>
+        <path class="ink" d="M480 246 V280"/>
+        <circle class="dot f-gnd" cx="480" cy="280" r="4"/>
+        <text class="lbl" x="500" y="236">relay coil</text>
+        <path class="mech" d="M492 212 L640 150"/>
+        <text class="lbl" x="420" y="306">Motor turns the crank and the cam together.</text>
+      </svg>

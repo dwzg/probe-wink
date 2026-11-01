@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 400" width="860" height="400">
+<style>
+text { font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; fill: #1B2430; font-size: 12px; }
+.lbl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; fill: #5A6675; }
+.ttl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #1B2430; }
+.box { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.5; }
+.box-soft { fill: #DCE8F3; stroke: #5B7FA5; stroke-width: 1.5; }
+.frame { fill: none; stroke: #5A6675; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.coil { fill: #FFFFFF; stroke: #6B4FA0; stroke-width: 2; }
+.part { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.6; }
+.fuse { fill: #FFFFFF; stroke: #B57D0C; stroke-width: 2; }
+.w { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.up { stroke: #B8402F; } .down { stroke: #2F6CB0; } .pwr { stroke: #B57D0C; } .gnd { stroke: #4A5563; } .trig { stroke: #6B4FA0; } .acc { stroke: #5B7FA5; }
+.dot { stroke: none; }
+.f-up { fill: #B8402F; } .f-down { fill: #2F6CB0; } .f-pwr { fill: #B57D0C; } .f-gnd { fill: #4A5563; } .f-fg { fill: #1B2430; } .f-trig { fill: #6B4FA0; } .f-acc { fill: #5B7FA5; }
+.mech { fill: none; stroke: #5A6675; stroke-width: 1.4; stroke-dasharray: 4 4; }
+.ink { fill: none; stroke: #1B2430; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ghost { fill: none; stroke: #5A6675; stroke-width: 1.6; stroke-dasharray: 3 3; stroke-linecap: round; }
+.axis { fill: none; stroke: #C9D2DC; stroke-width: 1.2; }
+.link { fill: none; stroke: #5B7FA5; stroke-width: 2; stroke-dasharray: 7 5; }
+.t-up { fill: #B8402F; } .t-down { fill: #2F6CB0; } .t-pwr { fill: #B57D0C; } .t-trig { fill: #6B4FA0; }
+</style>
+<rect x="0" y="0" width="860" height="400" fill="#FFFFFF"/>
+<title>Y-adapter between the factory harness plug and the retractor: BK/W and BK pass straight through, BK/W is tapped through a 1 A fuse and BK is tapped; the UP and DOWN lines are broken and both ends go to the module over a 6-wire lead.</title>
+<text x="80" y="28" class="ttl" text-anchor="middle">Harness</text>
+<text x="400" y="28" class="lbl" text-anchor="middle">Y-adapter · one per side</text>
+<text x="750" y="28" class="ttl" text-anchor="middle">Retractor</text>
+<rect class="box" x="20" y="40" width="120" height="170" rx="2"/>
+<rect class="box-soft" x="660" y="40" width="180" height="170" rx="2"/>
+<rect class="frame" x="160" y="40" width="480" height="170"/>
+<rect class="part" x="160" y="52" width="14" height="146" rx="2"/>
+<rect class="part" x="626" y="52" width="14" height="146" rx="2"/>
+<text x="30" y="74" class="t-pwr">BK/W</text>
+<text x="30" y="104">BK</text>
+<text x="30" y="144" class="t-up">BK/R</text>
+<text x="30" y="174" class="t-down">BK/BL</text>
+<text x="80" y="200" class="lbl" text-anchor="middle">factory plug</text>
+<text x="670" y="74" class="t-pwr">BK/W</text>
+<text x="670" y="104">BK</text>
+<text x="670" y="144">UP in</text>
+<text x="670" y="174">DOWN in</text>
+<text x="750" y="200" class="lbl" text-anchor="middle">factory socket</text>
+<path class="w pwr" d="M140 70 H660"/>
+<path class="w gnd" d="M140 100 H392 a8 8 0 0 1 16 0 H660"/>
+<text x="520" y="62" class="lbl" text-anchor="middle">BK/W motor power, through</text>
+<circle class="dot f-pwr" cx="400" cy="70" r="4.5"/>
+<circle class="dot f-gnd" cx="460" cy="100" r="4.5"/>
+<path class="w pwr" d="M400 70 V122 M400 158 V260"/>
+<rect class="fuse" x="391" y="122" width="18" height="36" rx="2"/>
+<path class="pwr" d="M400 126 V154"/>
+<text x="416" y="145" class="lbl">1 A</text>
+<path class="w gnd" d="M460 100 V260"/>
+<path class="w up" d="M140 140 H340 V260"/>
+<path class="w down" d="M140 170 H300 V260"/>
+<text x="184" y="133" class="lbl">UP from switch</text>
+<text x="184" y="163" class="lbl">DOWN from switch</text>
+<path class="ink" d="M660 140 H520 V260"/>
+<path class="ink" d="M660 170 H560 V260"/>
+<text x="616" y="133" class="lbl" text-anchor="end">to UP in</text>
+<text x="616" y="163" class="lbl" text-anchor="end">to DOWN in</text>
+<rect class="box" x="280" y="260" width="300" height="26" rx="2"/>
+<text x="300" y="278" text-anchor="middle">1</text>
+<text x="340" y="278" text-anchor="middle">2</text>
+<text x="400" y="278" text-anchor="middle">5</text>
+<text x="460" y="278" text-anchor="middle">6</text>
+<text x="520" y="278" text-anchor="middle">3</text>
+<text x="560" y="278" text-anchor="middle">4</text>
+<text x="270" y="278" class="lbl" text-anchor="end">6-wire lead</text>
+<text x="590" y="278" class="lbl">J1 wire numbers</text>
+<path class="ink" d="M430 286 V320"/>
+<rect class="box-soft" x="280" y="320" width="300" height="60" rx="2"/>
+<text x="430" y="346" class="ttl" text-anchor="middle">Wink module</text>
+<text x="430" y="367" class="lbl" text-anchor="middle">swap relay · supply · ESP32-C3</text>
+</svg>

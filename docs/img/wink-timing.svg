@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 230" width="760" height="230">
+<style>
+text { font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; fill: #1B2430; font-size: 12px; }
+.lbl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; fill: #5A6675; }
+.ttl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #1B2430; }
+.box { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.5; }
+.box-soft { fill: #DCE8F3; stroke: #5B7FA5; stroke-width: 1.5; }
+.frame { fill: none; stroke: #5A6675; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.coil { fill: #FFFFFF; stroke: #6B4FA0; stroke-width: 2; }
+.part { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.6; }
+.fuse { fill: #FFFFFF; stroke: #B57D0C; stroke-width: 2; }
+.w { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.up { stroke: #B8402F; } .down { stroke: #2F6CB0; } .pwr { stroke: #B57D0C; } .gnd { stroke: #4A5563; } .trig { stroke: #6B4FA0; } .acc { stroke: #5B7FA5; }
+.dot { stroke: none; }
+.f-up { fill: #B8402F; } .f-down { fill: #2F6CB0; } .f-pwr { fill: #B57D0C; } .f-gnd { fill: #4A5563; } .f-fg { fill: #1B2430; } .f-trig { fill: #6B4FA0; } .f-acc { fill: #5B7FA5; }
+.mech { fill: none; stroke: #5A6675; stroke-width: 1.4; stroke-dasharray: 4 4; }
+.ink { fill: none; stroke: #1B2430; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ghost { fill: none; stroke: #5A6675; stroke-width: 1.6; stroke-dasharray: 3 3; stroke-linecap: round; }
+.axis { fill: none; stroke: #C9D2DC; stroke-width: 1.2; }
+.link { fill: none; stroke: #5B7FA5; stroke-width: 2; stroke-dasharray: 7 5; }
+.t-up { fill: #B8402F; } .t-down { fill: #2F6CB0; } .t-pwr { fill: #B57D0C; } .t-trig { fill: #6B4FA0; }
+</style>
+<rect x="0" y="0" width="760" height="230" fill="#FFFFFF"/>
+<title>Wink timing: a relay held longer than the travel time T gives a full wink and return; a shorter hold stops the lamp part-way.</title>
+        <text class="ttl" x="40" y="22">A · Relay on ≥ T: full wink</text>
+        <text class="ttl" x="420" y="22">B · Relay on &lt; T: stops part-way</text>
+        <text class="lbl" x="0" y="66">Relay</text>
+        <text class="lbl" x="0" y="146">Lamp</text>
+        <path class="axis" d="M70 80 H360 M70 180 H360"/>
+        <text class="lbl" x="365" y="123">up</text><text class="lbl" x="365" y="184">down</text>
+        <path class="axis" d="M70 120 H360"/>
+        <path class="w trig" d="M70 80 H100 V48 H220 V80 H360"/>
+        <path class="w acc" d="M70 180 H100 L180 120 H220 L300 180 H360"/>
+        <path class="axis" d="M100 196 V204 M180 196 V204 M220 196 V204 M300 196 V204"/>
+        <text x="140" y="222" text-anchor="middle">T</text>
+        <text x="260" y="222" text-anchor="middle">T</text>
+        <path class="axis" d="M100 200 H180 M220 200 H300"/>
+        <path class="axis" d="M450 80 H740 M450 180 H740 M450 120 H740"/>
+        <path class="w trig" d="M450 80 H480 V48 H526 V80 H740"/>
+        <path class="w acc" d="M450 180 H480 L526 145.5 H740"/>
+        <path class="axis" d="M480 196 V204 M560 196 V204"/>
+        <path class="axis" d="M480 200 H560"/>
+        <text x="520" y="222" text-anchor="middle">T</text>
+        <text class="lbl" x="560" y="140">brakes here, stays</text>
+      </svg>

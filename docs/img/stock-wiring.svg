@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 340" width="780" height="340">
+<style>
+text { font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; fill: #1B2430; font-size: 12px; }
+.lbl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; fill: #5A6675; }
+.ttl { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #1B2430; }
+.box { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.5; }
+.box-soft { fill: #DCE8F3; stroke: #5B7FA5; stroke-width: 1.5; }
+.frame { fill: none; stroke: #5A6675; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.coil { fill: #FFFFFF; stroke: #6B4FA0; stroke-width: 2; }
+.part { fill: #FFFFFF; stroke: #1B2430; stroke-width: 1.6; }
+.fuse { fill: #FFFFFF; stroke: #B57D0C; stroke-width: 2; }
+.w { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.up { stroke: #B8402F; } .down { stroke: #2F6CB0; } .pwr { stroke: #B57D0C; } .gnd { stroke: #4A5563; } .trig { stroke: #6B4FA0; } .acc { stroke: #5B7FA5; }
+.dot { stroke: none; }
+.f-up { fill: #B8402F; } .f-down { fill: #2F6CB0; } .f-pwr { fill: #B57D0C; } .f-gnd { fill: #4A5563; } .f-fg { fill: #1B2430; } .f-trig { fill: #6B4FA0; } .f-acc { fill: #5B7FA5; }
+.mech { fill: none; stroke: #5A6675; stroke-width: 1.4; stroke-dasharray: 4 4; }
+.ink { fill: none; stroke: #1B2430; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ghost { fill: none; stroke: #5A6675; stroke-width: 1.6; stroke-dasharray: 3 3; stroke-linecap: round; }
+.axis { fill: none; stroke: #C9D2DC; stroke-width: 1.2; }
+.link { fill: none; stroke: #5B7FA5; stroke-width: 2; stroke-dasharray: 7 5; }
+.t-up { fill: #B8402F; } .t-down { fill: #2F6CB0; } .t-pwr { fill: #B57D0C; } .t-trig { fill: #6B4FA0; }
+</style>
+<rect x="0" y="0" width="780" height="340" fill="#FFFFFF"/>
+<title>Stock system: one headlamp switch drives the shared UP and DOWN lines to both retractors; motor power and ground come separately.</title>
+        <rect class="box" x="20" y="22" width="130" height="34" rx="2"/>
+        <text x="85" y="44" text-anchor="middle">30A RETRA</text>
+        <rect class="box" x="20" y="150" width="190" height="110" rx="2"/>
+        <text class="ttl" x="34" y="176">Headlamp switch</text>
+        <text class="lbl" x="34" y="200">OFF → DOWN line live</text>
+        <text class="lbl" x="34" y="220">HEAD → UP line live</text>
+        <text class="lbl" x="34" y="244">(p. 6-160)</text>
+        <rect class="box-soft" x="560" y="30" width="200" height="120" rx="2"/>
+        <text class="ttl" x="660" y="56" text-anchor="middle">RH retractor</text>
+        <text class="lbl" x="660" y="76" text-anchor="middle">C188 (1991) · C160 (1989)</text>
+        <rect class="box-soft" x="560" y="200" width="200" height="120" rx="2"/>
+        <text class="ttl" x="660" y="226" text-anchor="middle">LH retractor</text>
+        <text class="lbl" x="660" y="246" text-anchor="middle">C187 (1991) · C159 (1989)</text>
+        <text x="570" y="99" class="t-pwr">BK/W</text><text x="570" y="116" class="t-up">BK/R</text><text x="570" y="134" class="t-down">BK/BL</text><text x="752" y="144" text-anchor="end">BK</text>
+        <text x="570" y="266" class="t-pwr">BK/W</text><text x="570" y="284" class="t-up">BK/R</text><text x="570" y="302" class="t-down">BK/BL</text><text x="752" y="314" text-anchor="end">BK</text>
+        <path class="w pwr" d="M150 39 H470 V95 H560"/>
+        <path class="w pwr" d="M470 95 V262 H560"/>
+        <circle class="dot f-pwr" cx="470" cy="95" r="4.5"/>
+        <path class="w up" d="M210 190 H440"/>
+        <path class="w up" d="M440 112 V280"/>
+        <path class="w up" d="M440 112 H560"/>
+        <path class="w up" d="M440 280 H560"/>
+        <circle class="dot f-up" cx="440" cy="190" r="4.5"/>
+        <path class="w down" d="M210 228 H410"/>
+        <path class="w down" d="M410 130 V298 H560"/>
+        <path class="w down" d="M410 130 H560"/>
+        <circle class="dot f-down" cx="410" cy="228" r="4.5"/>
+        <path class="w gnd" d="M760 140 H772 V158"/>
+        <path class="ink" d="M762 158 H782 M766 163 H778 M770 168 H774"/>
+        <path class="w gnd" d="M760 310 H772 V326"/>
+        <path class="ink" d="M762 326 H782 M766 331 H778 M770 336 H774"/>
+        <text class="lbl" x="220" y="182">BK/R · UP</text>
+        <text class="lbl" x="220" y="246">BK/BL · DOWN</text>
+        <text class="lbl" x="160" y="32">BK/W · constant +12 V</text>
+        <text class="lbl" x="300" y="320">shared by both sides</text>
+        <path class="mech" d="M380 312 L405 290"/>
+      </svg>
