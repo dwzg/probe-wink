@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#5B7FA5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#11161c" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Web Bluetooth control for the probe-wink headlamp modules.">
+<title>Probe Wink</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root {
+  --bg: #eef2f6;
+  --surface: #ffffff;
+  --surface-2: #e3e9f0;
+  --text: #0f1720;
+  --muted: #4a5868;
+  --border: #c3cedb;
+  --accent: #5B7FA5;
+  --accent-soft: #A0C4E2;
+  --accent-ink: #3f6189;
+  --btn: #46698f;
+  --btn-text: #ffffff;
+  --stop: #a3241b;
+  --stop-text: #ffffff;
+  --danger-bg: #fde3e0;
+  --danger-text: #8c1d15;
+  --danger-border: #d9786f;
+  --warn-bg: #fff1cc;
+  --warn-text: #6b4700;
+  --warn-border: #d8b25a;
+  --ok-text: #24603a;
+  --focus: #1d4f86;
+  --shadow: 0 1px 2px rgba(15, 23, 32, .08);
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1116;
+    --surface: #161d25;
+    --surface-2: #1f2832;
+    --text: #e8eef4;
+    --muted: #9fb0c2;
+    --border: #2e3a47;
+    --accent: #5B7FA5;
+    --accent-soft: #A0C4E2;
+    --accent-ink: #A0C4E2;
+    --btn: #4a6e96;
+    --btn-text: #ffffff;
+    --stop: #b3342a;
+    --stop-text: #ffffff;
+    --danger-bg: #3a1714;
+    --danger-text: #ffb4ab;
+    --danger-border: #8c3a33;
+    --warn-bg: #352a10;
+    --warn-text: #f3d38a;
+    --warn-border: #7a6122;
+    --ok-text: #8fd4a4;
+    --focus: #A0C4E2;
+    --shadow: none;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+main { max-width: 560px; margin: 0 auto; padding: 12px 16px 32px; display: flex; flex-direction: column; gap: 12px; }
+main > * { margin: 0 !important; }
+/* Connected: the connection buttons move below the controls, out of thumb range. */
+main.connected #conn { order: 1; }
+main.connected #logBox, main.connected footer { order: 2; }
+.bar {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 16px; padding-top: max(10px, env(safe-area-inset-top));
+  background: var(--surface); border-bottom: 1px solid var(--border);
+}
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand svg { flex: none; width: 32px; height: 32px; border-radius: 8px; }
+h1 { font-size: 1.2rem; margin: 0; letter-spacing: .01em; white-space: nowrap; }
+h2 { font-size: 1rem; margin: 0 0 10px; }
+.pill {
+  flex: none; font-size: .85rem; font-weight: 600;
+  padding: 5px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface-2); color: var(--muted);
+}
+.pill[data-phase="connected"] { color: var(--ok-text); border-color: currentColor; }
+.pill[data-phase="connecting"], .pill[data-phase="auth"] { color: var(--accent-ink); border-color: currentColor; }
+.pill[data-phase="lost"] { color: var(--danger-text); border-color: currentColor; }
+
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin: 12px 0; box-shadow: var(--shadow);
+}
+.banner {
+  border-radius: var(--radius); padding: 12px 14px; margin: 12px 0;
+  border: 1px solid var(--warn-border); background: var(--warn-bg); color: var(--warn-text);
+}
+.banner[data-kind="error"] { border-color: var(--danger-border); background: var(--danger-bg); color: var(--danger-text); }
+.banner[data-kind="info"] { border-color: var(--accent); background: var(--surface); color: var(--text); }
+.banner p { margin: 0 0 6px; }
+.banner p:last-child { margin-bottom: 0; }
+.banner a { color: inherit; font-weight: 600; }
+
+.state { border-left: 6px solid var(--accent); }
+.state .label { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.state-word { font-size: 2.4rem; font-weight: 750; line-height: 1.1; margin: 2px 0 4px; overflow-wrap: anywhere; }
+.state-text { color: var(--muted); min-height: 1.4em; }
+.state[data-tone="active"] { border-left-color: var(--accent-soft); }
+.state[data-tone="fault"] { background: var(--danger-bg); border-color: var(--danger-border); border-left-color: var(--stop); }
+.state[data-tone="fault"] .state-word, .state[data-tone="fault"] .state-text { color: var(--danger-text); }
+.state[data-tone="sleep"] .state-word { color: var(--muted); }
+.meter { height: 8px; border-radius: 4px; background: var(--surface-2); margin-top: 10px; overflow: hidden; }
+.meter > div { height: 100%; width: 0; background: var(--accent); transition: width .25s linear; }
+.reply {
+  margin-top: 10px; padding: 8px 10px; border-radius: 8px; font-weight: 600;
+  background: var(--warn-bg); color: var(--warn-text); border: 1px solid var(--warn-border);
+}
+.reply[data-kind="error"] { background: var(--danger-bg); color: var(--danger-text); border-color: var(--danger-border); }
+.subline {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
+}
+.subline span { min-width: 0; overflow-wrap: anywhere; }
+
+.btn {
+  appearance: none; font: inherit; font-weight: 700; font-size: 1.1rem;
+  min-height: 64px; padding: 10px 14px; width: 100%;
+  border-radius: 12px; border: 1px solid transparent;
+  background: var(--btn); color: var(--btn-text);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  cursor: pointer; touch-action: manipulation; user-select: none;
+}
+.btn small { font-size: .8rem; font-weight: 500; opacity: .9; }
+.btn:active:not(:disabled) { filter: brightness(.88); }
+.btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.btn:disabled { opacity: .38; cursor: not-allowed; }
+.btn.ghost { background: var(--surface-2); color: var(--text); border-color: var(--border); }
+.btn.small { min-height: 56px; width: auto; min-width: 96px; font-size: .95rem; }
+.btn.stop { background: var(--stop); color: var(--stop-text); min-height: 76px; font-size: 1.35rem; letter-spacing: .06em; }
+.btn.busy { position: relative; }
+.btn.busy::after {
+  content: ""; position: absolute; left: 12px; right: 12px; bottom: 6px; height: 3px;
+  border-radius: 2px; background: currentColor; opacity: .6;
+}
+
+.conn { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 12px 0; }
+.conn.two { grid-template-columns: 1fr 1fr; }
+.linkish { background: none; border: 0; color: var(--accent-ink); font: inherit; text-decoration: underline; padding: 8px 0; min-height: 56px; cursor: pointer; }
+.linkish:disabled { opacity: .4; cursor: not-allowed; }
+
+.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+.span2 { grid-column: 1 / -1; }
+.alt { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: stretch; }
+.stepper {
+  display: grid; grid-template-columns: 56px 52px 56px; align-items: center;
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface); overflow: hidden;
+}
+.stepper button {
+  appearance: none; border: 0; background: var(--surface-2); color: var(--text);
+  font: inherit; font-size: 1.5rem; font-weight: 700; height: 100%; min-height: 64px; cursor: pointer;
+  touch-action: manipulation;
+}
+.stepper button:disabled { opacity: .38; cursor: not-allowed; }
+.stepper output { text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hint { color: var(--muted); font-size: .88rem; margin: 4px 2px 0; }
+
+.remote .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+details.log summary { cursor: pointer; font-weight: 700; min-height: 56px; display: flex; align-items: center; }
+#log {
+  list-style: none; margin: 10px 0; padding: 8px; max-height: 260px; overflow: auto;
+  background: var(--surface-2); border-radius: 8px;
+  font: .82rem/1.45 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+#log li { overflow-wrap: anywhere; }
+#log .t { color: var(--muted); }
+#log .tx { color: var(--accent-ink); }
+#log .err { color: var(--danger-text); }
+.demo { border-style: dashed; }
+.demo .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.demo .btn { min-height: 56px; font-size: .95rem; }
+footer { color: var(--muted); font-size: .88rem; margin-top: 18px; }
+footer p { margin: 0 0 8px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="brand">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#5B7FA5"/><path d="M10 40 L28 40 L28 30 Q19 24 10 30 Z" fill="#fff"/><rect x="36" y="38" width="18" height="5" rx="2" fill="#A0C4E2"/></svg>
+    <h1>Probe Wink</h1>
+  </div>
+  <span id="pill" class="pill" data-phase="idle" role="status">Disconnected</span>
+</header>
+
+<main id="main">
+  <section id="banner" class="banner" hidden role="alert"></section>
+
+  <section id="stateCard" class="card state" aria-live="polite">
+    <div class="label">Module state</div>
+    <div id="stateWord" class="state-word">&mdash;</div>
+    <div id="stateText" class="state-text">Not connected.</div>
+    <div id="meter" class="meter" hidden><div id="meterFill"></div></div>
+    <div id="reply" class="reply" hidden></div>
+    <div class="subline">
+      <span id="remoteLine">Remote: no report yet</span>
+      <button id="btnStatus" class="btn small ghost" type="button" disabled>Refresh</button>
+    </div>
+  </section>
+
+  <section id="conn" class="conn">
+    <button id="btnConnect" class="btn" type="button">Connect</button>
+    <button id="btnDisconnect" class="btn ghost" type="button" hidden>Disconnect</button>
+  </section>
+  <div id="pickOther" hidden><button id="btnPick" class="linkish" type="button">Choose a different device</button></div>
+
+  <section class="controls" aria-label="Lamp controls">
+    <button class="btn cmd" type="button" data-cmd="WINK L" disabled>Wink LH<small>left lamp</small></button>
+    <button class="btn cmd" type="button" data-cmd="WINK R" disabled>Wink RH<small>right lamp</small></button>
+    <button class="btn cmd span2" type="button" data-cmd="WINK B" disabled>Wink both</button>
+    <div class="alt span2">
+      <button id="btnAlt" class="btn cmd" type="button" data-cmd="ALT" disabled><span>Alternate <span id="altLabel">8 s</span></span><small>max 10 s, 20 s rest after</small></button>
+      <div class="stepper" role="group" aria-label="Alternate duration">
+        <button id="altMinus" type="button" aria-label="Shorter">&minus;</button>
+        <output id="altSecs" aria-live="polite">8 s</output>
+        <button id="altPlus" type="button" aria-label="Longer">+</button>
+      </div>
+    </div>
+    <button class="btn stop cmd span2" type="button" data-cmd="STOP" disabled>STOP<small>all relays off now</small></button>
+    <p class="hint span2" id="ctlHint">While a wink or alternation runs, only STOP is accepted.</p>
+  </section>
+
+  <section class="card remote" aria-label="Bluetooth remote">
+    <h2>Bluetooth remote</h2>
+    <div class="btns">
+      <button class="btn ghost cmd" type="button" data-cmd="PAIR REMOTE" disabled>Pair remote<small>scans 30 s</small></button>
+      <button class="btn ghost cmd" type="button" data-cmd="FORGET REMOTE" disabled>Forget remote</button>
+    </div>
+    <p class="hint">Remote: 1 press = wink LH, 2 = RH, 3 = both, long press = alternate 8 s (or stop).</p>
+  </section>
+
+  <section id="demoPanel" class="card demo" hidden aria-label="Demo simulation">
+    <h2>Demo: simulate</h2>
+    <div class="btns">
+      <button class="btn ghost" type="button" data-sim="under">Undervoltage</button>
+      <button class="btn ghost" type="button" data-sim="over">Overvoltage</button>
+      <button class="btn ghost" type="button" data-sim="clear">Supply OK</button>
+      <button class="btn ghost" type="button" data-sim="remote">Remote on/off</button>
+      <button class="btn ghost" type="button" data-sim="drop">Drop link</button>
+      <button class="btn ghost" type="button" data-sim="sleep">Fall asleep</button>
+    </div>
+    <p class="hint">Only in demo mode. <a href="./">Leave demo</a></p>
+  </section>
+
+  <details class="card log" id="logBox">
+    <summary>Log</summary>
+    <ol id="log"></ol>
+    <button id="btnClearLog" class="btn small ghost" type="button">Clear log</button>
+  </details>
+
+  <footer>
+    <p>Connect to the <strong>LH (master)</strong> module; the RH module follows over ESP-NOW and does not accept phone connections.</p>
+    <p>First connection: Android asks for a passkey. Enter the 6-digit <code>WINK_BLE_PASSKEY</code> the firmware was built with (<code>secrets.rs</code>).</p>
+  </footer>
+</main>
+
+<script>
+'use strict';
+
+/* ---------- Firmware interface (firmware/wink-app/src/ble_phone.rs, wink-core) ---------- */
+const SERVICE_UUID = '7a1e0001-5c0b-4e57-9b1a-70726f626577';
+const COMMAND_UUID = '7a1e0002-5c0b-4e57-9b1a-70726f626577';
+const STATE_UUID   = '7a1e0003-5c0b-4e57-9b1a-70726f626577';
+// GAP name is "ProbeWink"; the advertisement carries the short name "PWink".
+const DEVICE_NAMES = ['ProbeWink', 'PWink'];
+// wink-core/src/config.rs (TIMING). travel_ms is still a placeholder there,
+// so the derived durations shown here are estimates.
+const FW = {
+  altMaxS: 10, altDefaultS: 8, altPeriodMs: 1200, restMs: 20000, winkHoldMs: 1300,
+  maxCmdLen: 32, remoteScanMs: 30000,
+};
+const STATES = ['asleep', 'idle', 'wink', 'alternating', 'resting', 'overvoltage', 'undervoltage'];
+
+const STATE_INFO = {
+  asleep:       { tone: 'sleep',  text: 'Going to deep sleep. It wakes when a headlamp UP/DOWN line changes; then reconnect.' },
+  idle:         { tone: 'ok',     text: 'Ready.' },
+  wink:         { tone: 'active', text: 'Winking. Only STOP is accepted.' },
+  alternating:  { tone: 'active', text: 'Alternating. Only STOP is accepted.' },
+  resting:      { tone: 'ok',     text: 'Rest after alternating: winks work, alternate is locked.' },
+  overvoltage:  { tone: 'fault',  text: 'Supply above 16.5 V on a module. Winks and alternate are refused until it recovers.' },
+  undervoltage: { tone: 'fault',  text: 'Supply too low on a module for the relay to pull in (10–11.9 V, higher when hot). Winks and alternate are refused until it recovers.' },
+};
+const ERROR_INFO = {
+  'busy':            'Refused: a wink or alternation is running. Only STOP works now.',
+  'resting':         'Refused: alternate is locked for 20 s after each run. Winks still work.',
+  'overvoltage':     'Refused: supply voltage too high.',
+  'undervoltage':    'Refused: supply voltage too low.',
+  'empty':           'Firmware rejected the command: empty.',
+  'too long':        'Firmware rejected the command: too long.',
+  'not ascii':       'Firmware rejected the command: not ASCII.',
+  'unknown command': 'Firmware rejected the command: unknown command.',
+  'bad argument':    'Firmware rejected the command: bad argument.',
+};
+const REMOTE_INFO = {
+  'pairing':        'searching for a remote (30 s), put it in pairing mode',
+  'paired':         'paired',
+  'none found':     'none found',
+  'pairing failed': 'pairing failed',
+  'connected':      'connected',
+  'disconnected':   'disconnected',
+  'forgotten':      'forgotten',
+};
+
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const $ = (id) => document.getElementById(id);
+
+/* ---------- Real transport: Web Bluetooth ---------- */
+class BleLink {
+  constructor(device) {
+    this.device = device;
+    this.cmd = null;
+    this.stateChar = null;
+    this.queue = Promise.resolve();
+    this.onNotify = null;
+    this.onDisconnect = null;
+    this._disc = () => { if (this.onDisconnect) this.onDisconnect(); };
+    this._value = (e) => { if (this.onNotify) this.onNotify(dec.decode(e.target.value)); };
+    device.addEventListener('gattserverdisconnected', this._disc);
+  }
+  get name() { return this.device.name || 'ProbeWink'; }
+  get connected() { return !!(this.device.gatt && this.device.gatt.connected); }
+  // One GATT operation at a time: every read, write and subscribe goes through here.
+  op(fn) {
+    const p = this.queue.then(fn);
+    this.queue = p.catch(() => {});
+    return p;
+  }
+  async connect() {
+    const server = await this.device.gatt.connect();
+    const svc = await server.getPrimaryService(SERVICE_UUID);
+    const cmd = await svc.getCharacteristic(COMMAND_UUID);
+    const st = await svc.getCharacteristic(STATE_UUID);
+    if (this.stateChar && this.stateChar !== st) this.stateChar.removeEventListener('characteristicvaluechanged', this._value);
+    this.cmd = cmd;
+    this.stateChar = st;
+    st.addEventListener('characteristicvaluechanged', this._value);
+  }
+  read() { return this.op(async () => dec.decode(await this.stateChar.readValue())); }
+  subscribe() { return this.op(() => this.stateChar.startNotifications()); }
+  write(text) {
+    const data = enc.encode(text);
+    const c = this.cmd;
+    return this.op(() => (c.writeValueWithResponse ? c.writeValueWithResponse(data) : c.writeValue(data)));
+  }
+  disconnect() { if (this.connected) this.device.gatt.disconnect(); }
+  dispose() {
+    this.device.removeEventListener('gattserverdisconnected', this._disc);
+    if (this.stateChar) this.stateChar.removeEventListener('characteristicvaluechanged', this._value);
+  }
+}
+
+/* ---------- Demo transport: simulated module, no Bluetooth ---------- */
+// Mirrors wink-core: command.rs (parser), controller.rs (modes, rest, faults)
+// and the remote status texts of ble_remote.rs. Nothing here is used by the
+// real path.
+class DemoLink {
+  constructor() {
+    this.name = 'ProbeWink (demo)';
+    this.connected = false;
+    this.onNotify = null;
+    this.onDisconnect = null;
+    this.mode = { kind: 'idle' };
+    this.restUntil = 0;
+    this.inhibit = null;
+    this.remoteStored = true;
+    this.remoteUp = true;
+    this.pairTimer = 0;
+    this.last = null;
+    this.timer = 0;
+  }
+  async connect() {
+    await sleep(500);
+    this.connected = true;
+    this.last = this.status();
+    clearInterval(this.timer);
+    this.timer = setInterval(() => this.tick(), 50);
+  }
+  async read() { await sleep(120); this.must(); return this.status(); }
+  async subscribe() { await sleep(60); this.must(); }
+  async write(text) {
+    await sleep(60 + Math.random() * 80);
+    this.must();
+    setTimeout(() => this.handle(text), 10);
+  }
+  disconnect() { this.drop(); }
+  dispose() { clearInterval(this.timer); clearTimeout(this.pairTimer); }
+  must() { if (!this.connected) throw new DOMException('GATT Server is disconnected.', 'NetworkError'); }
+  drop() {
+    if (!this.connected) return;
+    this.connected = false;
+    clearInterval(this.timer);
+    setTimeout(() => { if (this.onDisconnect) this.onDisconnect(); }, 30);
+  }
+  notify(text) { if (this.connected && this.onNotify) this.onNotify(text); }
+  status() {
+    if (this.inhibit) return this.inhibit;
+    if (this.mode.kind === 'wink') return 'wink';
+    if (this.mode.kind === 'alt') return 'alternating';
+    return this.restUntil ? 'resting' : 'idle';
+  }
+  advance(now) {
+    const m = this.mode;
+    if (m.kind === 'wink' && now >= m.until) this.mode = { kind: 'idle' };
+    if (m.kind === 'alt' && now >= m.end) { this.mode = { kind: 'idle' }; this.restUntil = m.end + FW.restMs; }
+    if (this.restUntil && now >= this.restUntil) this.restUntil = 0;
+  }
+  tick() {
+    this.advance(performance.now());
+    const s = this.status();
+    if (s !== this.last) { this.last = s; this.notify(s); }
+  }
+  stop(now) {
+    if (this.mode.kind === 'alt') this.restUntil = now + FW.restMs;
+    this.mode = { kind: 'idle' };
+  }
+  parse(text) {
+    const t = text.replace(/^[\s\0]+|[\s\0]+$/g, '');
+    if (!t) return { err: 'empty' };
+    if (t.length > FW.maxCmdLen) return { err: 'too long' };
+    if (/[^\x00-\x7f]/.test(t)) return { err: 'not ascii' };
+    const tok = t.toUpperCase().split(/\s+/);
+    if (tok.length > 2) return { err: 'bad argument' };
+    const [verb, arg] = tok;
+    if (verb === 'WINK') {
+      if (['L', 'LEFT', 'LH'].includes(arg)) return { cmd: 'wink', side: 'L' };
+      if (['R', 'RIGHT', 'RH'].includes(arg)) return { cmd: 'wink', side: 'R' };
+      if (['B', 'BOTH'].includes(arg)) return { cmd: 'wink', side: 'B' };
+      return { err: 'bad argument' };
+    }
+    if (verb === 'ALT') {
+      if (arg === undefined) return { cmd: 'alt', secs: FW.altDefaultS };
+      if (!/^\d{1,10}$/.test(arg) || Number(arg) === 0 || Number(arg) > 4294967295) return { err: 'bad argument' };
+      return { cmd: 'alt', secs: Number(arg) };
+    }
+    if (arg === undefined && verb === 'STOP') return { cmd: 'stop' };
+    if (arg === undefined && verb === 'STATUS') return { cmd: 'status' };
+    if (verb === 'PAIR' && arg === 'REMOTE') return { cmd: 'pair' };
+    if (verb === 'FORGET' && arg === 'REMOTE') return { cmd: 'forget' };
+    if (['STOP', 'STATUS', 'PAIR', 'FORGET'].includes(verb)) return { err: 'bad argument' };
+    return { err: 'unknown command' };
+  }
+  handle(text) {
+    const now = performance.now();
+    this.advance(now);
+    const p = this.parse(text);
+    if (p.err) return this.notify('error: ' + p.err);
+    const running = this.mode.kind !== 'idle';
+    switch (p.cmd) {
+      case 'status':
+        this.last = this.status();
+        this.notify(this.last);
+        this.notify(this.remoteUp ? 'remote: connected' : 'remote: disconnected');
+        return this.notify('version: 0.1.0-demo');
+      case 'stop': this.stop(now); break;
+      case 'wink':
+        if (this.inhibit) return this.notify('error: ' + this.inhibit);
+        if (running) return this.notify('error: busy');
+        this.mode = { kind: 'wink', until: now + FW.winkHoldMs };
+        break;
+      case 'alt': {
+        if (this.inhibit) return this.notify('error: ' + this.inhibit);
+        if (running) return this.notify('error: busy');
+        if (this.restUntil) return this.notify('error: resting ' + Math.ceil((this.restUntil - now) / 1000));
+        const secs = Math.min(Math.max(p.secs, 1), FW.altMaxS);
+        const phases = Math.max(1, Math.floor(secs * 1000 / FW.altPeriodMs));
+        this.mode = { kind: 'alt', end: now + phases * FW.altPeriodMs };
+        break;
+      }
+      case 'pair':
+        clearTimeout(this.pairTimer);
+        if (this.remoteUp) { this.remoteUp = false; this.notify('remote: disconnected'); }
+        this.notify('remote: pairing');
+        this.pairTimer = setTimeout(() => {
+          this.remoteStored = true; this.remoteUp = true;
+          this.notify('remote: paired');
+          this.notify('remote: connected');
+        }, 4000);
+        break;
+      case 'forget':
+        clearTimeout(this.pairTimer);
+        if (this.remoteUp) { this.remoteUp = false; this.notify('remote: disconnected'); }
+        this.remoteStored = false;
+        this.notify('remote: forgotten');
+        break;
+    }
+    this.tick();
+  }
+  simulate(what) {
+    const now = performance.now();
+    if (what === 'under' || what === 'over') {
+      this.advance(now);
+      if (this.mode.kind !== 'idle') this.stop(now);
+      this.inhibit = what === 'under' ? 'undervoltage' : 'overvoltage';
+    } else if (what === 'clear') {
+      this.inhibit = null;
+    } else if (what === 'remote') {
+      if (!this.remoteStored) return;
+      this.remoteUp = !this.remoteUp;
+      this.notify(this.remoteUp ? 'remote: connected' : 'remote: disconnected');
+    } else if (what === 'drop') {
+      this.drop();
+      return;
+    } else if (what === 'sleep') {
+      // The real module notifies "asleep" and then deep-sleeps: no further state.
+      clearInterval(this.timer);
+      this.stop(now);
+      this.last = 'asleep';
+      this.notify('asleep');
+      setTimeout(() => this.drop(), 300);
+      return;
+    }
+    this.tick();
+  }
+}
+
+/* ---------- App ---------- */
+const params = new URLSearchParams(location.search);
+const DEMO = params.get('demo') === '1';
+const HAS_BT = 'bluetooth' in navigator;
+
+const S = {
+  link: null,          // BleLink | DemoLink
+  device: null,        // remembered BluetoothDevice (real mode)
+  phase: 'idle',       // idle | connecting | auth | connected | lost
+  state: null,         // last state string from the module
+  inflight: 0,
+  activeCmd: null,
+  userDisconnect: false,
+  remote: 'no report yet',
+  remotePairing: false,
+  pairTimeout: 0,
+  altSecs: FW.altDefaultS,
+  altSent: null,       // { secs, at } of the last ALT write
+  altStart: 0, altEnd: 0,
+  restStart: 0, restEnd: 0, restExact: false,
+  replyTimer: 0,
+};
+
+try {
+  const v = Number(localStorage.getItem('probewink.altSecs'));
+  if (v >= 1 && v <= FW.altMaxS) S.altSecs = v;
+} catch (_) { /* storage unavailable */ }
+
+/* Log */
+function log(text, cls) {
+  const li = document.createElement('li');
+  const t = document.createElement('span');
+  t.className = 't';
+  t.textContent = new Date().toLocaleTimeString([], { hour12: false }) + ' ';
+  const m = document.createElement('span');
+  if (cls) m.className = cls;
+  m.textContent = text;
+  li.append(t, m);
+  const ol = $('log');
+  ol.append(li);
+  while (ol.children.length > 300) ol.firstChild.remove();
+  ol.scrollTop = ol.scrollHeight;
+}
+$('btnClearLog').addEventListener('click', () => { $('log').textContent = ''; });
+
+/* Banner */
+function banner(kind, paragraphs) {
+  const b = $('banner');
+  if (!paragraphs) { b.hidden = true; b.textContent = ''; return; }
+  b.dataset.kind = kind;
+  b.textContent = '';
+  for (const p of paragraphs) {
+    const el = document.createElement('p');
+    if (typeof p === 'string') el.textContent = p; else el.append(p);
+    b.append(el);
+  }
+  b.hidden = false;
+}
+function linkEl(href, text) { const a = document.createElement('a'); a.href = href; a.textContent = text; return a; }
+
+const PAIRING_HELP = [
+  'Pairing needed. When Android asks, enter the 6-digit passkey from secrets.rs (WINK_BLE_PASSKEY at build time).',
+  'If Android never asks, or the passkey was changed: remove the old "ProbeWink" pairing in Android Settings > Bluetooth, then connect again.',
+];
+
+function errText(e) { return e ? `${e.name || 'Error'}: ${e.message || e}` : 'unknown error'; }
+function looksLikeAuth(e) {
+  const s = errText(e).toLowerCase();
+  return /auth|pair|bond|insufficient|encrypt|not permitted|security|0x05|0x0f/.test(s);
+}
+
+/* Rendering */
+function render() {
+  const connected = S.phase === 'connected' && S.link && S.link.connected;
+  const pill = $('pill');
+  pill.dataset.phase = S.phase;
+  pill.textContent = {
+    idle: DEMO ? 'Demo' : 'Disconnected',
+    connecting: 'Connecting',
+    auth: 'Pairing',
+    connected: DEMO ? 'Demo connected' : 'Connected',
+    lost: 'Disconnected',
+  }[S.phase];
+
+  // State card
+  const card = $('stateCard');
+  const st = connected || S.phase === 'lost' ? S.state : null;
+  const info = st && STATE_INFO[st];
+  $('stateWord').textContent = st || '—';
+  let text;
+  if (S.phase === 'connecting') text = 'Connecting…';
+  else if (S.phase === 'auth') text = 'Securing the link. Enter the passkey if Android asks.';
+  else if (S.phase === 'lost') text = st === 'asleep' ? STATE_INFO.asleep.text : st ? 'Connection lost. Last known state shown.' : 'Not connected.';
+  else if (!connected) text = 'Not connected.';
+  else text = info ? info.text : 'Unknown state from module.';
+  $('stateText').textContent = text;
+  $('main').classList.toggle('connected', connected);
+  card.dataset.tone = !connected ? (S.phase === 'lost' ? 'sleep' : '') : (info ? info.tone : '');
+
+  // Command enablement: never while disconnected or a write is in flight;
+  // otherwise follow what the controller would accept (it stays the authority).
+  const ready = connected && S.inflight === 0;
+  const running = st === 'wink' || st === 'alternating';
+  const fault = st === 'overvoltage' || st === 'undervoltage';
+  for (const b of document.querySelectorAll('button.cmd')) {
+    const c = b.dataset.cmd;
+    let ok = ready;
+    if (c.startsWith('WINK')) ok = ok && !running && !fault;
+    else if (c === 'ALT') ok = ok && !running && !fault && st !== 'resting';
+    else if (c === 'PAIR REMOTE') ok = ok && !S.remotePairing;
+    b.disabled = !ok;
+    b.classList.toggle('busy', S.inflight > 0 && S.activeCmd === (c === 'ALT' ? 'ALT ' + S.altSecs : c));
+  }
+  $('btnStatus').disabled = !ready;
+  $('altMinus').disabled = S.altSecs <= 1;
+  $('altPlus').disabled = S.altSecs >= FW.altMaxS;
+  $('altSecs').textContent = S.altSecs + ' s';
+  $('altLabel').textContent = S.altSecs + ' s';
+
+  // Hint under the controls
+  let hint = 'While a wink or alternation runs, only STOP is accepted.';
+  if (connected && st === 'resting') {
+    hint = S.restExact && S.restEnd > Date.now()
+      ? `Alternate locked for about ${Math.ceil((S.restEnd - Date.now()) / 1000)} s more.`
+      : 'Alternate locked for up to 20 s after the last run.';
+  } else if (connected && fault) {
+    hint = 'Supply fault: only STOP, Refresh and remote commands are available.';
+  }
+  $('ctlHint').textContent = hint;
+
+  // Progress meter (alternation, rest), estimated from config.rs timing
+  const now = Date.now();
+  let frac = -1;
+  if (connected && st === 'alternating' && S.altEnd > S.altStart) frac = (now - S.altStart) / (S.altEnd - S.altStart);
+  else if (connected && st === 'resting' && S.restExact && S.restEnd > now) frac = 1 - (S.restEnd - now) / FW.restMs;
+  $('meter').hidden = frac < 0;
+  if (frac >= 0) $('meterFill').style.width = Math.min(100, Math.max(0, frac * 100)).toFixed(1) + '%';
+
+  // Remote
+  $('remoteLine').textContent = 'Remote: ' + S.remote + (S.version ? ' · firmware ' + S.version : '');
+
+  // Connection buttons
+  const bc = $('btnConnect');
+  const bd = $('btnDisconnect');
+  const busyConn = S.phase === 'connecting' || S.phase === 'auth';
+  bc.hidden = connected;
+  bd.hidden = !connected && !busyConn;
+  $('conn').classList.toggle('two', !bc.hidden && !bd.hidden);
+  bc.disabled = busyConn || (!DEMO && !HAS_BT);
+  bc.textContent = busyConn ? (S.phase === 'auth' ? 'Pairing…' : 'Connecting…')
+    : (S.device || (DEMO && S.link)) ? 'Reconnect' : 'Connect';
+  bd.textContent = busyConn ? 'Cancel' : 'Disconnect';
+  $('pickOther').hidden = DEMO || !HAS_BT || !S.device || connected || busyConn;
+}
+setInterval(() => {
+  if (S.state === 'alternating' || S.state === 'resting') render();
+}, 250);
+
+function showReply(kind, text) {
+  const r = $('reply');
+  r.dataset.kind = kind;
+  r.textContent = text;
+  r.hidden = false;
+  clearTimeout(S.replyTimer);
+  S.replyTimer = setTimeout(() => { r.hidden = true; }, 6000);
+}
+
+/* Incoming values: the state read and every notification */
+function handleText(raw, source) {
+  const text = raw.replace(/\0+/g, '').trim();
+  log((source === 'read' ? 'read: ' : '← ') + text);
+  if (text.startsWith('error:')) {
+    const reason = text.slice(6).trim();
+    const rest = /^resting (\d+)$/.exec(reason);   // firmware sends the seconds left
+    if (rest) {
+      const s = Number(rest[1]);
+      showReply('error', 'Refused: alternate is locked for another ' + s + ' s. Winks still work.');
+      S.restEnd = Date.now() + s * 1000; S.restStart = S.restEnd - FW.restMs; S.restExact = true;
+      render();
+      return;
+    }
+    showReply('error', ERROR_INFO[reason] || 'Refused: ' + reason);
+    return;
+  }
+  if (text.startsWith('version:')) {
+    S.version = text.slice(8).trim();
+    render();
+    return;
+  }
+  if (text.startsWith('remote:')) {
+    const status = text.slice(7).trim();
+    S.remote = REMOTE_INFO[status] || status;
+    if (status === 'pairing') {
+      S.remotePairing = true;
+      clearTimeout(S.pairTimeout);
+      S.pairTimeout = setTimeout(() => { S.remotePairing = false; render(); }, FW.remoteScanMs + 15000);
+    } else if (['paired', 'none found', 'pairing failed'].includes(status)) {
+      S.remotePairing = false;
+      clearTimeout(S.pairTimeout);
+    }
+    if (['none found', 'pairing failed'].includes(status)) showReply('warn', 'Remote ' + status + '.');
+    render();
+    return;
+  }
+  if (STATES.includes(text)) { setState(text); return; }
+  log('(unrecognised notification)', 'err');
+}
+
+function setState(next) {
+  const prev = S.state;
+  const now = Date.now();
+  if (next === 'alternating' && prev !== 'alternating') {
+    const secs = S.altSent && now - S.altSent.at < 3000 ? S.altSent.secs : FW.altDefaultS; // remote long press = ALT 8
+    const phases = Math.max(1, Math.floor(Math.min(secs, FW.altMaxS) * 1000 / FW.altPeriodMs));
+    S.altStart = now;
+    S.altEnd = now + phases * FW.altPeriodMs;
+  }
+  if (next === 'resting' && prev === 'alternating') {
+    S.restStart = now; S.restEnd = now + FW.restMs; S.restExact = true;
+  } else if (next === 'resting' && prev === 'wink' && S.restExact) {
+    // wink during rest: rest keeps running
+  } else if (next === 'resting' && prev !== 'resting') {
+    S.restExact = false;
+  }
+  if (next !== 'resting' && next !== 'wink') S.restExact = false;
+  S.state = next;
+  if (next === 'asleep') banner('info', ['The module is going to deep sleep (15 min without a command). It wakes when a headlamp UP/DOWN line changes, for example with the headlamp switch; then reconnect.']);
+  render();
+}
+
+/* Sending */
+async function send(cmd) {
+  if (!S.link || S.phase !== 'connected' || S.inflight) return;
+  if (cmd.length > FW.maxCmdLen) return;
+  S.inflight++;
+  S.activeCmd = cmd;
+  render();
+  log('→ ' + cmd, 'tx');
+  if (cmd.startsWith('ALT')) S.altSent = { secs: Number(cmd.split(' ')[1]) || FW.altDefaultS, at: Date.now() };
+  try {
+    await S.link.write(cmd);
+  } catch (e) {
+    log('write failed: ' + errText(e), 'err');
+    if (looksLikeAuth(e)) banner('error', PAIRING_HELP);
+    else showReply('error', 'Write failed: ' + (e.message || e));
+  } finally {
+    S.inflight--;
+    S.activeCmd = null;
+    render();
+  }
+}
+
+for (const b of document.querySelectorAll('button.cmd')) {
+  b.addEventListener('click', () => {
+    let c = b.dataset.cmd;
+    if (c === 'ALT') c = 'ALT ' + S.altSecs;
+    if (c === 'FORGET REMOTE' && !confirm('Forget the paired remote? It has to be paired again to work.')) return;
+    if (c === 'PAIR REMOTE') S.remote = 'requesting pairing…';
+    send(c);
+  });
+}
+$('btnStatus').addEventListener('click', () => send('STATUS'));
+function setAlt(v) {
+  S.altSecs = Math.min(FW.altMaxS, Math.max(1, v));
+  try { localStorage.setItem('probewink.altSecs', String(S.altSecs)); } catch (_) { /* ignore */ }
+  render();
+}
+$('altMinus').addEventListener('click', () => setAlt(S.altSecs - 1));
+$('altPlus').addEventListener('click', () => setAlt(S.altSecs + 1));
+
+/* Session: connect, read (triggers pairing), subscribe.
+   Returns 'ok' | 'auth' | 'unreachable' | 'cancelled'. */
+async function openSession(link, opts = {}) {
+  S.userDisconnect = false;
+  S.phase = 'connecting';
+  banner(null);
+  render();
+  link.onNotify = (t) => handleText(t, 'notify');
+  link.onDisconnect = onDisconnected;
+  const cancelled = () => {
+    if (!S.userDisconnect) return false;
+    try { link.disconnect(); } catch (_) { /* ignore */ }
+    S.phase = 'idle';
+    return true;
+  };
+  let stage = 'connect';
+  try {
+    log('connecting to ' + link.name);
+    await link.connect();
+    if (cancelled()) return 'cancelled';
+    stage = 'auth';
+    S.phase = 'auth';
+    render();
+    let state = null, lastErr = null;
+    for (let attempt = 1; attempt <= 3 && state === null; attempt++) {
+      try {
+        if (!link.connected) await link.connect();
+        if (cancelled()) return 'cancelled';
+        // First access to the protected characteristic: Android pairs here.
+        state = await link.read();
+      } catch (e) {
+        if (cancelled()) return 'cancelled';
+        lastErr = e;
+        log(`read attempt ${attempt} failed: ${errText(e)}`, 'err');
+        if (attempt === 1) banner('warn', ['Waiting for pairing. Enter the passkey from secrets.rs if Android asks.']);
+        await sleep(1500);
+      }
+    }
+    if (state === null) throw lastErr || new Error('could not read state');
+    await link.subscribe();
+    if (cancelled()) return 'cancelled';
+    S.phase = 'connected';
+    banner(null);
+    log('connected; notifications on');
+    handleText(state, 'read');
+    // STATUS also reports the remote link and the firmware version.
+    setTimeout(() => send('STATUS'), 0);
+    return 'ok';
+  } catch (e) {
+    if (cancelled()) return 'cancelled';
+    log(`${stage} failed: ${errText(e)}`, 'err');
+    S.phase = 'lost';
+    try { link.disconnect(); } catch (_) { /* ignore */ }
+    if (stage === 'auth' || looksLikeAuth(e)) {
+      banner('error', [...PAIRING_HELP, 'Detail: ' + errText(e)]);
+      return 'auth';
+    }
+    if (!opts.quiet) banner('error', [
+      'Could not connect: ' + (e.message || e),
+      'Is the LH module awake and in range? Only the LH (master) module accepts phone connections.',
+    ]);
+    return 'unreachable';
+  } finally {
+    render();
+  }
+}
+
+function onDisconnected() {
+  log('disconnected', S.userDisconnect ? '' : 'err');
+  S.inflight = 0;
+  S.activeCmd = null;
+  if (S.phase === 'connecting' || S.phase === 'auth') return; // openSession handles it
+  S.phase = S.userDisconnect ? 'idle' : 'lost';
+  if (!S.userDisconnect && S.state !== 'asleep') banner('warn', ['Connection lost. Tap Reconnect.']);
+  render();
+}
+
+async function pickDevice() {
+  // Must run straight from the click: no await before requestDevice.
+  try {
+    const device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: [SERVICE_UUID] }, ...DEVICE_NAMES.map((name) => ({ name }))],
+      optionalServices: [SERVICE_UUID],
+    });
+    useDevice(device);
+    await openSession(S.link);
+  } catch (e) {
+    if (e && e.name === 'NotFoundError' && /cancel/i.test(e.message)) { log('device chooser cancelled'); return; }
+    log('requestDevice failed: ' + errText(e), 'err');
+    banner('error', [
+      'Bluetooth: ' + (e.message || e),
+      'Check that Bluetooth is on and Chrome may use Nearby devices / Location.',
+    ]);
+    render();
+  }
+}
+
+function useDevice(device) {
+  if (S.link && S.link.dispose) S.link.dispose();
+  S.device = device;
+  S.link = new BleLink(device);
+}
+
+async function reconnectReal() {
+  const link = S.link;
+  const device = S.device;
+  // A device from getDevices() (after a reload) may need a fresh
+  // advertisement before Chrome can connect: try directly first, then watch.
+  const canWatch = typeof device.watchAdvertisements === 'function';
+  const r = await openSession(link, { quiet: canWatch });
+  if (r !== 'unreachable' || !canWatch || S.userDisconnect) return;
+  S.phase = 'connecting';
+  render();
+  log('waiting up to 15 s for an advertisement from ' + link.name);
+  const ac = new AbortController();
+  const seen = new Promise((resolve) => {
+    device.addEventListener('advertisementreceived', () => resolve(true), { once: true });
+  });
+  try {
+    await device.watchAdvertisements({ signal: ac.signal });
+    const got = await Promise.race([seen, sleep(15000).then(() => false)]);
+    ac.abort();
+    if (S.userDisconnect) return;
+    if (got) { await openSession(link); return; }
+    S.phase = 'lost';
+    banner('error', ['ProbeWink not seen for 15 s. Is the LH module awake and in range?', 'Only the LH (master) module accepts phone connections.']);
+  } catch (e) {
+    ac.abort();
+    if (S.userDisconnect) return;
+    log('watchAdvertisements failed: ' + errText(e), 'err');
+    S.phase = 'lost';
+    banner('error', ['Could not reach ProbeWink: ' + (e.message || e)]);
+  } finally {
+    render();
+  }
+}
+
+$('btnConnect').addEventListener('click', () => {
+  if (DEMO) {
+    if (!S.link) S.link = new DemoLink();
+    openSession(S.link);
+    return;
+  }
+  if (!HAS_BT) return;
+  if (S.device) reconnectReal();
+  else pickDevice();
+});
+$('btnPick').addEventListener('click', () => { if (HAS_BT && !DEMO) pickDevice(); });
+$('btnDisconnect').addEventListener('click', () => {
+  S.userDisconnect = true;
+  const wasBusy = S.phase === 'connecting' || S.phase === 'auth';
+  if (S.link) S.link.disconnect();
+  S.phase = 'idle';
+  banner(null);
+  if (wasBusy) log('connect cancelled');
+  render();
+});
+
+/* Demo panel */
+for (const b of document.querySelectorAll('[data-sim]')) {
+  b.addEventListener('click', () => {
+    if (S.link instanceof DemoLink) { log('[demo] simulate ' + b.dataset.sim); S.link.simulate(b.dataset.sim); }
+  });
+}
+
+/* Startup */
+async function init() {
+  if (DEMO) {
+    $('demoPanel').hidden = false;
+    banner('info', ['Demo mode: a simulated module, no Bluetooth. Timing follows the firmware defaults.', linkEl('./', 'Leave demo mode')]);
+  } else if (!HAS_BT) {
+    const why = !window.isSecureContext
+      ? 'Web Bluetooth needs HTTPS (or localhost). This page was loaded over plain HTTP.'
+      : 'This browser has no Web Bluetooth. Use Chrome or Edge on Android, or Chrome / Edge on desktop. iOS browsers (Safari, Chrome on iOS) and Firefox do not support it.';
+    banner('error', [why, linkEl('?demo=1', 'Try the demo mode instead')]);
+  } else {
+    if (navigator.bluetooth.getAvailability) {
+      try {
+        if (!(await navigator.bluetooth.getAvailability())) banner('warn', ['No Bluetooth adapter available, or Bluetooth is switched off.']);
+      } catch (_) { /* ignore */ }
+    }
+    // Permitted devices from earlier visits (not available in every Chrome build).
+    if (navigator.bluetooth.getDevices) {
+      try {
+        const devices = await navigator.bluetooth.getDevices();
+        const d = devices.find((x) => DEVICE_NAMES.includes(x.name)) || devices[0];
+        if (d) { useDevice(d); log('remembered device: ' + (d.name || d.id)); }
+      } catch (e) { log('getDevices failed: ' + errText(e), 'err'); }
+    }
+  }
+  render();
+}
+init();
+
+if ('serviceWorker' in navigator && window.isSecureContext) {
+  navigator.serviceWorker.register('sw.js').catch((e) => log('service worker: ' + errText(e), 'err'));
+}
+</script>
+</body>
+</html>

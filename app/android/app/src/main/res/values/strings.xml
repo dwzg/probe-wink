@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ProbeWink</string>
+    <string name="channel_link">Module connection</string>
+    <string name="widget_control">ProbeWink controls</string>
+    <string name="widget_action">ProbeWink button</string>
+    <string name="widget_control_desc">Wink LH, RH, both, alternate and stop, with the module state.</string>
+    <string name="widget_action_desc">One button for one action, chosen when you place it.</string>
+    <string name="cfg_title">What should this button do?</string>
+    <string name="widget_hint">Long-press the home screen, tap Widgets and pick ProbeWink.</string>
+</resources>

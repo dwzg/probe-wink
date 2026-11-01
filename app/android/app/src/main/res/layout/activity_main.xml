@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- state -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card"
+            android:orientation="vertical"
+            android:padding="16dp">
+            <TextView
+                android:id="@+id/state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text"
+                android:textSize="30sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/state_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/muted"
+                android:textSize="15sp" />
+            <TextView
+                android:id="@+id/reply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/fault"
+                android:textSize="15sp"
+                android:visibility="gone" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/remote"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/muted"
+                    android:textSize="13sp" />
+                <Button
+                    android:id="@+id/btn_status"
+                    style="@style/BtnQuiet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Refresh" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- module -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/module"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/text"
+                android:textSize="14sp" />
+            <Button
+                android:id="@+id/btn_choose"
+                style="@style/BtnQuiet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Choose" />
+            <Button
+                android:id="@+id/btn_connect"
+                style="@style/BtnQuiet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connect" />
+        </LinearLayout>
+
+        <!-- winks -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btn_lh"
+                style="@style/Btn"
+                android:layout_width="0dp"
+                android:layout_height="72dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="Wink LH" />
+            <Button
+                android:id="@+id/btn_rh"
+                style="@style/Btn"
+                android:layout_width="0dp"
+                android:layout_height="72dp"
+                android:layout_weight="1"
+                android:text="Wink RH" />
+        </LinearLayout>
+        <Button
+            android:id="@+id/btn_both"
+            style="@style/Btn"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="8dp"
+            android:text="Wink both" />
+
+        <!-- alternate -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btn_alt_minus"
+                style="@style/BtnQuiet"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:text="−"
+                android:textSize="22sp" />
+            <TextView
+                android:id="@+id/alt_secs"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/text"
+                android:textSize="16sp" />
+            <Button
+                android:id="@+id/btn_alt_plus"
+                style="@style/BtnQuiet"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:text="+"
+                android:textSize="22sp" />
+            <Button
+                android:id="@+id/btn_alt"
+                style="@style/Btn"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_weight="1"
+                android:text="Alternate" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_stop"
+            style="@style/Btn"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/btn_stop"
+            android:text="Stop" />
+
+        <!-- remote, widgets, log -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btn_pair"
+                style="@style/BtnQuiet"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Pair remote" />
+            <Button
+                android:id="@+id/btn_forget"
+                style="@style/BtnQuiet"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Forget remote" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btn_widget"
+                style="@style/BtnQuiet"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Add widget" />
+            <Button
+                android:id="@+id/btn_log"
+                style="@style/BtnQuiet"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Show log" />
+        </LinearLayout>
+        <FrameLayout
+            android:id="@+id/log_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card"
+            android:padding="8dp"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/log"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:textColor="@color/muted"
+                android:textIsSelectable="true"
+                android:textSize="12sp" />
+        </FrameLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="de.wtzg.probewink.ActionWidgetConfigure"
+    android:description="@string/widget_action_desc"
+    android:initialLayout="@layout/widget_action"
+    android:previewLayout="@layout/widget_action"
+    android:minWidth="57dp"
+    android:minHeight="57dp"
+    android:targetCellWidth="1"
+    android:targetCellHeight="1"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="0"
+    android:widgetFeatures="reconfigurable"
+    android:widgetCategory="home_screen|keyguard" />
