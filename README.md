@@ -18,7 +18,6 @@ comes from the retractor's own feed; no wires go into the cabin.
 | PCB (rev C)       | designed, ERC/DRC and layout checks pass; not yet built |
 | Housing (rev C)   | designed and checked on the model; not yet printed      |
 | Firmware          | logic unit-tested on the host; runs on an ESP32 devkit (boot, radio, BLE, phone pairing); not yet run on the module |
-| Phone web page    | done; tested in headless Chrome, not yet against a module |
 | Android app       | built with home-screen widgets; unit tests and lint pass; not yet run on a phone |
 | On the car        | nothing tested yet                                      |
 
@@ -48,8 +47,7 @@ retractor sends that lamp the opposite way. Details:
 | `pcb/`          | KiCad project, generated from Python (`schematic.py`, `check.py`, `board.py`, `fab.py`, `export_enclosure.py`); [README](pcb/README.md) |
 | `enclosure/`    | 3D-printable housing in build123d (`housing.py`, `check.py`, `render.py`) |
 | `firmware/`     | Rust on ESP-IDF for the ESP32-C3; [README](firmware/README.md) |
-| `app/web/`      | Web Bluetooth phone page; [README](app/web/README.md)        |
-| `app/android/`  | native Android app with home-screen widgets; [README](app/android/README.md) |
+| `android/`      | Android app with home-screen widgets; [README](android/README.md) |
 | `tools/kicad/`  | generic KiCad generator library used by `pcb/`               |
 | `Makefile`      | one target per part                                          |
 
@@ -67,12 +65,6 @@ make test        # firmware logic tests + Android unit tests
 What each target needs (KiCad 10, Freerouting, a Python venv for build123d,
 the Rust toolchain): [docs/building.md](docs/building.md).
 
-The phone page needs no build. Try it in demo mode:
-
-```sh
-cd app/web && python3 -m http.server 8000   # open http://localhost:8000/?demo=1
-```
-
 ## Safety
 
 - The module switches the command lines of the headlamp retractors. With the
@@ -89,4 +81,7 @@ cd app/web && python3 -m http.server 8000   # open http://localhost:8000/?demo=1
 
 ## Licence
 
-To be decided.
+- **Software** (`firmware/`, `android/`, `tools/`, and the generator scripts in
+  `pcb/` and `enclosure/`): [MIT](LICENSE).
+- **Hardware design** (the KiCad files in `pcb/`, the housing models built by
+  `enclosure/`): not decided yet.
