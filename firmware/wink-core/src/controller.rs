@@ -70,6 +70,8 @@ pub enum Reject {
     Supply(Fault),
     /// Not a mode command (PAIR REMOTE etc.); handled by the app.
     NotMine,
+    /// Drive lock on and the engine runs (decided by the app, see `voltage::engine_running`).
+    EngineRunning,
 }
 
 impl Reject {
@@ -80,6 +82,7 @@ impl Reject {
             Reject::Supply(Fault::Overvoltage) => "overvoltage",
             Reject::Supply(Fault::Undervoltage) => "undervoltage",
             Reject::NotMine => "not a mode command",
+            Reject::EngineRunning => "engine running",
         }
     }
 }
@@ -141,7 +144,9 @@ impl Controller {
                 self.mode = Mode::Alt { start: now, period, phases };
                 Ok(())
             }
-            Command::PairRemote | Command::ForgetRemote | Command::Status => Err(Reject::NotMine),
+            Command::PairRemote | Command::ForgetRemote | Command::Status | Command::DriveLock(_) => {
+                Err(Reject::NotMine)
+            }
         }
     }
 

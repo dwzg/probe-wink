@@ -13,7 +13,7 @@ use wink_core::controller::{Controller, Reject, Status};
 use wink_core::proto::{self, Message, ReplayGuard, Role, SupplyState};
 use wink_core::remote::{pattern_command, Edge, PressDecoder};
 use wink_core::safety::{HeartbeatSender, OnTimeLimiter};
-use wink_core::voltage::{Fault, SupplyGuard};
+use wink_core::voltage::{Fault, SupplyGuard, engine_running};
 use wink_core::Millis;
 
 use crate::ble_phone::Phone;
@@ -51,6 +51,8 @@ struct State {
     last_status: Option<Status>,
     /// Last remote link report, resent on STATUS.
     remote_up: bool,
+    /// Refuse winks / ALT while the engine runs (NVS).
+    drive_lock: bool,
 }
 
 impl Master {
@@ -69,6 +71,7 @@ impl Master {
             last_ping: now,
             last_status: None,
             remote_up: false,
+            drive_lock: self.store.drive_lock(),
         };
         self.link.send(Message::Ping);
 
@@ -196,6 +199,18 @@ impl Master {
                 self.phone.set_state(st.ctl.status().as_str());
                 self.phone.reply(if st.remote_up { "remote: connected" } else { "remote: disconnected" });
                 self.phone.reply(concat!("version: ", env!("CARGO_PKG_VERSION")));
+                self.phone.reply(if st.drive_lock { "drivelock: on" } else { "drivelock: off" });
+            }
+            Command::DriveLock(on) => {
+                st.drive_lock = on;
+                self.store.set_drive_lock(on);
+                info!("drive lock {}", if on { "on" } else { "off" });
+                self.phone.reply(if on { "drivelock: on" } else { "drivelock: off" });
+            }
+            // Same path for phone and remote: refused before the controller sees it.
+            c if st.drive_lock && c.moves_lamps() && engine_running(&SUPPLY, st.supply.last_rail_mv()) => {
+                info!("{c:?} refused: engine running (drive lock)");
+                self.phone.reply(&format!("error: {}", Reject::EngineRunning.as_str()));
             }
             Command::PairRemote => self.remote.request_pair(),
             Command::ForgetRemote => self.remote.request_forget(),

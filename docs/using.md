@@ -36,9 +36,11 @@ Written as text to the command characteristic `7a1e0002-…`, case-insensitive:
 | `WINK B`        | both lamps flip and return                               |
 | `ALT n`         | alternate for n seconds (capped at 10; bare `ALT` = 8)   |
 | `STOP`          | all relays off at once, even mid-travel                  |
-| `STATUS`        | the module re-sends its state                            |
+| `STATUS`        | the module re-sends its state, remote link, firmware version and drive lock |
 | `PAIR REMOTE`   | scan 30 s for a BLE remote and bond with it              |
 | `FORGET REMOTE` | forget the stored remote                                 |
+| `DRIVELOCK ON`  | refuse winks and alternate while the engine runs (stored; off by default) |
+| `DRIVELOCK OFF` | allow them again                                         |
 
 While a wink or alternation runs, everything except `STOP` is refused. LH and RH
 are as seen from the driver's seat.
@@ -125,3 +127,11 @@ A control that changes the headlamps may be illegal while driving in many
 places (in Germany it is a TÜV question). Treat wink and alternation as
 parked-car features. The modules cannot see the parking brake or the vehicle
 speed, so this is on the driver.
+
+The optional **drive lock** helps against accidental presses (app switch "Block
+winks while the engine runs", or `DRIVELOCK ON`). With it on, the LH module
+refuses winks and alternate, from the phone and the remote alike, while its
+supply shows the alternator charging: rail at or above 12.7 V, about 13.5 V at
+the battery. Stop always works. It is off by default, and it also blocks
+winking with the engine idling while parked. The threshold is still to be
+checked on the car ([testing](testing.md#measure-on-the-car-first)).

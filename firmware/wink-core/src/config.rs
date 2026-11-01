@@ -144,6 +144,12 @@ pub struct SupplySense {
     /// energize minimum (it keeps its distance to `under_mv`).
     pub under_recover_mv: u32,
     pub over_recover_mv: u32,
+    /// Drive lock: a rail at or above this means the alternator is charging, i.e.
+    /// the engine runs. The rail sits one diode drop (~0.8 V) below the battery:
+    /// 12.7 V here is ~13.5 V at the battery, above a resting battery (12.6-12.8 V,
+    /// up to ~13.2 V surface charge just after driving) and below charging
+    /// (13.8-14.6 V). Measure on the car (docs/testing.md).
+    pub engine_running_mv: u32,
     /// Calibrated pin readings at or above this count as saturated (the
     /// 12 dB range is specified to 2500 mV), which means "too high".
     pub adc_max_valid_mv: u32,
@@ -175,6 +181,7 @@ pub const SUPPLY: SupplySense = SupplySense {
     release_over_mv: 16_800, // datasheet worst case (85 °C, 1 A contacts)
     release_under_mv: 9_000, // 75 % of nominal; coil holds, see above
     under_recover_mv: 12_200,
+    engine_running_mv: 12_700,
     over_recover_mv: 16_000,
     adc_max_valid_mv: 2_450,
     adc_raw_saturated: 4_000,
@@ -194,6 +201,7 @@ const _: () = {
     assert!(s.under_mv < s.under_recover_mv);
     assert!(s.under_recover_mv < s.over_recover_mv);
     assert!(s.over_recover_mv < s.over_mv);
+    assert!(s.under_min_mv < s.engine_running_mv && s.engine_running_mv < s.over_mv);
     assert!(s.over_mv <= s.release_over_mv);
     // The highest threshold must be measurable below ADC saturation.
     assert!(

@@ -8,7 +8,8 @@ import java.util.UUID
  *
  * - Command characteristic: write (with response), ASCII text, at most 32 bytes.
  * - State characteristic: read + notify, ASCII text: a state word, or
- *   `error: <reason>` (`error: resting <s>`), `remote: <status>`, `version: <x.y.z>`.
+ *   `error: <reason>` (`error: resting <s>`), `remote: <status>`, `version: <x.y.z>`,
+ *   `drivelock: on|off`.
  * Both need an encrypted, authenticated (passkey) link from a bonded phone.
  */
 object Protocol {
@@ -28,6 +29,8 @@ object Protocol {
     val STATES = listOf("asleep", "idle", "wink", "alternating", "resting", "overvoltage", "undervoltage")
 
     fun alt(seconds: Int) = "ALT ${seconds.coerceIn(1, ALT_MAX_S)}"
+
+    fun driveLock(on: Boolean) = if (on) "DRIVELOCK ON" else "DRIVELOCK OFF"
 }
 
 /** What a button, widget or tile can ask for. `ALTERNATE` uses the length set in the app. */
@@ -49,6 +52,7 @@ sealed interface Notice {
     data class Error(val reason: String, val restingSeconds: Int? = null) : Notice
     data class Remote(val status: String) : Notice
     data class Version(val version: String) : Notice
+    data class DriveLock(val on: Boolean) : Notice
     data class Unknown(val text: String) : Notice
 }
 
@@ -66,6 +70,8 @@ fun parseNotice(raw: String): Notice {
         }
         t.startsWith("remote:") -> Notice.Remote(t.removePrefix("remote:").trim())
         t.startsWith("version:") -> Notice.Version(t.removePrefix("version:").trim())
+        t == "drivelock: on" -> Notice.DriveLock(true)
+        t == "drivelock: off" -> Notice.DriveLock(false)
         t in Protocol.STATES -> Notice.State(t)
         else -> Notice.Unknown(t)
     }
@@ -91,5 +97,6 @@ fun describeError(e: Notice.Error): String = when (e.reason) {
         ?: "Refused: alternate is locked after each run. Winks still work."
     "overvoltage" -> "Refused: supply voltage too high."
     "undervoltage" -> "Refused: supply voltage too low."
+    "engine running" -> "Refused: the engine is running and the drive lock is on."
     else -> "Refused: ${e.reason}."
 }

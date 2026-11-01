@@ -11,6 +11,8 @@ const TX_EPOCH: &str = "tx_epoch";
 const RX_EPOCH: &str = "rx_epoch";
 /// Bonded remote: 6 address bytes (LE) + address type.
 const REMOTE: &str = "remote";
+/// u8: 1 = refuse lamp movement while the engine runs.
+const DRIVE_LOCK: &str = "drivelock";
 
 pub struct Store {
     nvs: EspDefaultNvs,
@@ -41,6 +43,17 @@ impl Store {
     pub fn set_rx_epoch(&mut self, e: u32) {
         if let Err(err) = self.nvs.set_u32(RX_EPOCH, e) {
             warn!("NVS write rx_epoch failed: {err}");
+        }
+    }
+
+    /// Drive lock setting (off unless set).
+    pub fn drive_lock(&self) -> bool {
+        self.nvs.get_u8(DRIVE_LOCK).ok().flatten() == Some(1)
+    }
+
+    pub fn set_drive_lock(&mut self, on: bool) {
+        if let Err(err) = self.nvs.set_u8(DRIVE_LOCK, on as u8) {
+            warn!("NVS: drive lock not saved: {err}");
         }
     }
 

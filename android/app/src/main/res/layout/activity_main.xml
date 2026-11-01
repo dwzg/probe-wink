@@ -165,6 +165,17 @@
             android:background="@drawable/btn_stop"
             android:text="Stop" />
 
+        <!-- settings stored on the module -->
+        <Switch
+            android:id="@+id/drive_lock"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:minHeight="48dp"
+            android:text="Block winks while the engine runs"
+            android:textColor="@color/text"
+            android:textSize="15sp" />
+
         <!-- remote, widgets, log -->
         <LinearLayout
             android:layout_width="match_parent"

@@ -76,6 +76,10 @@ Once a module is built, also measure the +12 V rail at the module during a wink:
 an alternation switches a relay on at every phase change, so a rail that sags
 below the energize minimum while the motors run stops it with `undervoltage`.
 
+- Battery voltage at idle with the alternator charging, and right after
+  switching the engine off: the drive lock's threshold (`SUPPLY.engine_running_mv`,
+  12.7 V on the rail, about 13.5 V at the battery) must sit between the two.
+
 ## Radio in the car
 
 Before ordering boards, check the radio path with two dev boards at the two

@@ -47,6 +47,15 @@ pub enum Command {
     PairRemote,
     ForgetRemote,
     Status,
+    /// Refuse lamp movement while the engine runs (stored on the module).
+    DriveLock(bool),
+}
+
+impl Command {
+    /// Does this command move a lamp? (What the drive lock refuses; STOP never.)
+    pub const fn moves_lamps(self) -> bool {
+        matches!(self, Command::Wink(_) | Command::Alt { .. })
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -116,7 +125,9 @@ pub fn parse(input: &[u8], alt_default_s: u32) -> Result<Command, ParseError> {
         ("STATUS", None) => Ok(Command::Status),
         ("PAIR", Some("REMOTE")) => Ok(Command::PairRemote),
         ("FORGET", Some("REMOTE")) => Ok(Command::ForgetRemote),
-        ("STOP" | "STATUS" | "PAIR" | "FORGET", _) => Err(ParseError::BadArgument),
+        ("DRIVELOCK", Some("ON")) => Ok(Command::DriveLock(true)),
+        ("DRIVELOCK", Some("OFF")) => Ok(Command::DriveLock(false)),
+        ("STOP" | "STATUS" | "PAIR" | "FORGET" | "DRIVELOCK", _) => Err(ParseError::BadArgument),
         _ => Err(ParseError::Unknown),
     }
 }
@@ -189,6 +200,14 @@ mod tests {
         assert_eq!(p("PAIR"), Err(ParseError::BadArgument));
         assert_eq!(p("PAIR PHONE"), Err(ParseError::BadArgument));
         assert_eq!(p("FORGET REMOTE"), Ok(Command::ForgetRemote));
+        assert_eq!(p("DRIVELOCK ON"), Ok(Command::DriveLock(true)));
+        assert_eq!(p("drivelock off"), Ok(Command::DriveLock(false)));
+        assert_eq!(p("DRIVELOCK"), Err(ParseError::BadArgument));
+        assert_eq!(p("DRIVELOCK MAYBE"), Err(ParseError::BadArgument));
+        assert!(Command::Wink(Side::Left).moves_lamps());
+        assert!(Command::Alt { secs: 8 }.moves_lamps());
+        assert!(!Command::Stop.moves_lamps());
+        assert!(!Command::DriveLock(true).moves_lamps());
         assert_eq!(p("HONK"), Err(ParseError::Unknown));
     }
 

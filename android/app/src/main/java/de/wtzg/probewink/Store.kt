@@ -55,6 +55,8 @@ object Store {
     val version: String? get() = prefs.getString("version", null)
     val lastReply: String? get() = prefs.getString("reply", null)
     val problem: String? get() = prefs.getString("problem", null)
+    /** Drive lock as last reported by the module; null = not known yet. */
+    val driveLock: Boolean? get() = if (prefs.contains("drive_lock")) prefs.getBoolean("drive_lock", false) else null
 
     fun setLink(l: Link, problem: String? = null) {
         edit {
@@ -75,6 +77,7 @@ object Store {
             is Notice.Error -> edit { putString("reply", describeError(n)) }
             is Notice.Remote -> edit { putString("remote", n.status) }
             is Notice.Version -> edit { putString("version", n.version) }
+            is Notice.DriveLock -> edit { putBoolean("drive_lock", n.on) }
             is Notice.Unknown -> Unit
         }
         changed()

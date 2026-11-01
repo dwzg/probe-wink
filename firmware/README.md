@@ -187,10 +187,16 @@ wink longer than the on-time limit).
 advertised as `PWink` (GAP name `ProbeWink`).
 
 - Command characteristic `7a1e0002-…` (write): `WINK L|R|B`, `ALT [n]`,
-  `STOP`, `PAIR REMOTE`, `FORGET REMOTE`, `STATUS`. Case-insensitive.
+  `STOP`, `PAIR REMOTE`, `FORGET REMOTE`, `STATUS`, `DRIVELOCK ON|OFF`.
+  Case-insensitive. `STATUS` answers with the state, then `remote: …`,
+  `version: …` and `drivelock: on|off`.
+- Drive lock (stored in NVS, off by default): while on, `WINK`/`ALT` from the
+  phone or the remote are refused with `error: engine running` when the rail
+  reads at or above `SUPPLY.engine_running_mv` (12.7 V, alternator charging).
 - State characteristic `7a1e0003-…` (read, notify): `asleep`, `idle`, `wink`,
   `alternating`, `resting`, `overvoltage`, `undervoltage`; replies
-  `error: busy|resting|overvoltage|undervoltage|<parse error>` and
+  `error: busy|resting <s>|overvoltage|undervoltage|engine running|<parse error>`,
+  `drivelock: on|off`, `version: <x.y.z>` and
   `remote: pairing|paired|none found|pairing failed|connected|disconnected|forgotten`.
 - Security: LE Secure Connections with MITM and bonding; the module has
   IO capability DisplayOnly with the fixed passkey `WINK_BLE_PASSKEY`, so the

@@ -25,6 +25,7 @@ import android.os.ParcelUuid
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.Switch
 import android.widget.TextView
 
 /** Setup and full control: module choice, all commands, remote pairing, state and log. */
@@ -62,6 +63,7 @@ class MainActivity : Activity() {
     private lateinit var log: TextView
     private lateinit var logBox: View
     private lateinit var commandButtons: List<Button>
+    private lateinit var driveLock: Switch
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,6 +108,7 @@ class MainActivity : Activity() {
                 .setNegativeButton("Cancel", null).show()
         }
         findViewById<Button>(R.id.btn_widget).setOnClickListener { pinWidget() }
+        driveLock = findViewById(R.id.drive_lock)
         findViewById<Button>(R.id.btn_log).setOnClickListener { logOpen = !logOpen; render() }
     }
 
@@ -258,6 +261,13 @@ class MainActivity : Activity() {
             b.isEnabled = Store.address != null && (b.id == R.id.btn_stop || !running || Store.link != Link.CONNECTED)
         }
         findViewById<Button>(R.id.btn_alt).isEnabled = Store.address != null && !(Store.link == Link.CONNECTED && (running || s == "resting"))
+        // Drive lock: shows the module's stored setting; tapping sends the change.
+        driveLock.setOnCheckedChangeListener(null)
+        driveLock.isChecked = Store.driveLock == true
+        driveLock.isEnabled = Store.address != null
+        driveLock.text = if (Store.driveLock == null) "Block winks while the engine runs (connect to read)"
+            else "Block winks while the engine runs"
+        driveLock.setOnCheckedChangeListener { _, on -> send(Protocol.driveLock(on)) }
         logBox.visibility = if (logOpen) View.VISIBLE else View.GONE
         findViewById<Button>(R.id.btn_log).text = if (logOpen) "Hide log" else "Show log"
         if (logOpen) log.text = Store.logText(last = 60)

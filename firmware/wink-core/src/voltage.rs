@@ -71,6 +71,12 @@ pub fn energize_under_mv(cfg: &SupplySense, temp_c: Option<i32>) -> u32 {
     (pull_in + cfg.pull_in_margin_mv).clamp(cfg.under_min_mv, cfg.under_mv)
 }
 
+/// Is the engine running (alternator charging)? `None` (saturated or no
+/// reading) counts as running, so the drive lock errs towards refusing.
+pub fn engine_running(cfg: &SupplySense, rail_mv: Option<u32>) -> bool {
+    rail_mv.is_none_or(|mv| mv >= cfg.engine_running_mv)
+}
+
 /// May a relay be switched on at this reading? (energize band, temperature unknown)
 pub fn classify_energize(cfg: &SupplySense, r: AdcReading) -> Verdict {
     verdict(rail_mv(cfg, r), cfg.under_mv, cfg.over_mv)
@@ -391,6 +397,14 @@ mod tests {
         assert_eq!(g.fault(), Some(Fault::Undervoltage));
         g.update(1600, at(12_300), false);
         assert_eq!(g.fault(), None);
+    }
+
+    #[test]
+    fn engine_running_threshold() {
+        assert!(!engine_running(&SUPPLY, Some(12_000))); // engine off, 12.8 V battery
+        assert!(!engine_running(&SUPPLY, Some(12_400))); // surface charge after driving
+        assert!(engine_running(&SUPPLY, Some(13_300)));  // charging, 14.1 V battery
+        assert!(engine_running(&SUPPLY, None));          // no reading: refuse
     }
 
     #[test]

@@ -28,6 +28,16 @@ class ProtocolTest {
         assertEquals(Notice.Version("0.1.0"), parseNotice("version: 0.1.0"))
     }
 
+    @Test fun driveLock() {
+        assertEquals(Notice.DriveLock(true), parseNotice("drivelock: on"))
+        assertEquals(Notice.DriveLock(false), parseNotice("drivelock: off"))
+        assertEquals("DRIVELOCK ON", Protocol.driveLock(true))
+        assertEquals(
+            "Refused: the engine is running and the drive lock is on.",
+            describeError(Notice.Error("engine running")),
+        )
+    }
+
     @Test fun unknown() {
         assertTrue(parseNotice("hello") is Notice.Unknown)
     }
