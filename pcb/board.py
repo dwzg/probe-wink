@@ -10,7 +10,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "tools"))
 import pcbnew  # noqa: E402
-from kicad.board import Board, drc, foreign_copper, path_length, render  # noqa: E402
+from kicad.board import Board, acute_angles, drc, foreign_copper, narrow_tracks, path_length, render  # noqa: E402
 
 BUILD = os.path.join(HERE, "build")
 PCB = os.path.join(HERE, "probe-wink.kicad_pcb")
@@ -46,9 +46,9 @@ FIXED = {
     "L1": (128.3, 114.0, 0),
     "C4": (127.0, 118.4, 180), "C13": (127.0, 120.6, 180),
     "C1": (118.4, 116.2, 270), "C11": (115.8, 116.2, 270),
-    "R10": (117.5, 108.7, 180), "R9": (117.5, 110.8, 0), "R8": (117.5, 112.8, 0),
+    "R9": (117.5, 108.7, 0), "R10": (117.5, 110.8, 180), "R8": (117.5, 112.8, 0),
     # module 3V3 pin: 100 nF then 10 uF straight above pin 1, fed from the top edge
-    "C6": (143.8, 107.6, 180), "C5": (143.8, 104.9, 180),
+    "C6": (143.8, 107.0, 180), "C5": (143.8, 104.9, 180),
     # EN: RC right at pin 2 (EN jogs left over the free pins 3/4)
     "C7": (140.8, 106.9, 90), "R11": (140.8, 102.55, 270),
     # flyback diode above the relay, clear of the J1 legend; 12 V test pad on the input rail
@@ -87,12 +87,14 @@ near("R6", ("Q1", 1))
 # ---- sense buffers (UP, DOWN) and supply divider below the module, near their pins
 # USB pogo pads on the back (bare copper), right under their pins
 b.place("TP1", 137.64, 131.2, 0, back=True); b.place("TP2", 139.9, 133.0, 0, back=True)
-near("R12", ("U2", 16))
-near("C10", ("U2", 15)); near("R16", ("U2", 15)); near("R15", ("U2", 15))
+# under the module's bottom pins: IO2 pull-up upright under pin 16; supply-sense divider and filter
+# in a row left of pin 15; pins 17/18 (sense lines) drop straight down past them
+b.place("R12", 142.14, 130.58, 90)
+b.place("R15", 135.7, 134.0, 0); b.place("R16", 138.55, 134.0, 270); b.place("C10", 140.64, 134.0, 270)
 # ---- programming header, test pads (3V3 and 12V far apart), fiducials
-near("TP5", (133.0, 137.0))
+b.place("TP5", 133.0, 137.3, 0)
 near("TP3", (128.6, 123.4))
-near("FID1", (101.8, 101.8)); near("FID2", (127.9, 109.3)); near("FID3", (131.5, 138.2))
+near("FID1", (101.8, 101.8)); near("FID2", (127.9, 109.3)); near("FID3", (101.8, 138.2))
 
 # fiducials: keep tracks out of the 2 mm mask opening + clearance (Freerouting ignores pad-local clearance)
 for f in ("FID1", "FID2", "FID3"):
@@ -119,16 +121,17 @@ def hand_route():
     T("+12V", [("U1", 5), ("C2", 1)], V33)
     T("BUCK_EN", [("R8", 2), ("U1", 4)], SIG)
     # feedback: divider at the FB pin, ground through its own via into the solid bottom plane
-    T("BUCK_FB", [("R10", 1), ("R9", 2), (119.5, 110.46), ("U1", 3)], SIG)
-    T("GND", [("R10", 2), (116.59, 107.4), (121.0, 107.4), (121.0, 108.9)], 0.3)   # FB ground to the IC ground
-    b.via("GND", 116.59, 107.4)
-    # FB divider top: 3V3 from the top-edge rail, around the input stage, never through the hot loop
-    # (up between the 12 V trace and R10's ground via; under the 12 V link only for the last 4 mm)
-    T("+3V3", [("R9", 1), (115.7, 110.8), (115.7, 106.6), (115.85, 106.25)], SIG)
-    b.via("+3V3", 115.85, 106.25)
-    T("+3V3", [(115.85, 106.25), (115.85, 101.75)], SIG, layer=pcbnew.B_Cu)
+    T("BUCK_FB", [("R9", 2), ("R10", 1), (120.05, 110.8)], SIG)
+    # divider bottom: its own via into the solid plane under the buck (U1 GND drops at 121.0/108.9)
+    T("GND", [("R10", 2), (115.6, 110.8)], 0.3)
+    b.via("GND", 115.6, 110.8)
+    # FB divider top: 3V3 from the top-edge rail, up at 45 degrees to a via, under the 12 V link
+    # on the bottom, never through the hot loop
+    T("+3V3", [("R9", 1), (116.59, 107.0), (115.85, 106.26)], SIG)
+    b.via("+3V3", 115.85, 106.26)
+    T("+3V3", [(115.85, 106.26), (115.85, 101.75)], SIG, layer=pcbnew.B_Cu)
     b.via("+3V3", 115.85, 101.75)
-    T("+3V3", [(115.85, 101.75), (115.85, 101.3), (131.0, 101.3)], SIG)
+    T("+3V3", [(115.85, 101.75), (116.3, 101.3), (131.0, 101.3)], SIG)
     T("GND", [("U1", 2), (121.0, 108.9)], 0.4)
     b.via("GND", 121.0, 108.9)
     T("BUCK_CB", [("U1", 1), ("C3", 1)], 0.4)
@@ -153,18 +156,28 @@ def hand_route():
     b.via("SIDE", 139.14, 108.5)
     T("SIDE", [(139.14, 108.5), ("JP1", 1)], SIG, layer=pcbnew.B_Cu)
     # relay drive: module pin 10 along the open strip above the sense cells to the base resistor
-    T("RELAY_DRV", [("U2", 10), (133.14, 128.7), (b.pad_xy("R5", 1)[0], 128.7), ("R5", 1)], SIG)
+    T("RELAY_DRV", [("U2", 10), (133.14, 129.2), (b.pad_xy("R5", 1)[0], 129.2), ("R5", 1)], SIG)
     # 3V3 for the pull-ups below the module and in the sense cells: from the output caps via TP3,
     # with a via there so the bottom loads do not get fed from the far side of the board
     T("+3V3", [("C13", 1), (127.95, 122.4), ("TP3", 1)], SIG)
     T("+3V3", [("TP3", 1), (129.8, 123.4)], SIG)
     b.via("+3V3", 129.8, 123.4)
+    # ...and on down the back to the pull-ups below the module: R17 through a via above it,
+    # R12 (boxed in by the sense lines on top) around the USB pads to a via under it
+    T("+3V3", [(129.8, 123.4), (129.8, 130.4), (129.8, 135.6), (141.14, 135.6), (142.14, 134.6), (142.14, 132.55)],
+      SIG, layer=pcbnew.B_Cu)
+    b.via("+3V3", 129.8, 130.4)
+    T("+3V3", [(129.8, 130.4), (129.8, 131.3)], SIG)
+    # R18 (DOWN cell pull-up, between the cells): a branch along the back to a via above it
+    T("+3V3", [(129.8, 131.8), (116.8, 131.8)], SIG, layer=pcbnew.B_Cu)
+    b.via("+3V3", 116.8, 131.8)
+    T("+3V3", [(116.8, 131.8), ("R18", 1)], SIG)
     T("GND", [("C5", 2), ("C6", 2)], 0.5)
     b.via("GND", 142.85, 106.25)
     b.via("GND", 142.85, 103.4)
     T("GND", [("C5", 2), (142.85, 103.4)], 0.5)
-    # EN: up from pin 2, jog left over the unused pins 3/4, RC and pull-up right there
-    T("EN", [("U2", 2), (143.64, 108.85), (142.0, 108.85), (142.0, 103.46), ("R11", 2)], SIG)
+    # EN: off pin 2 at 45 degrees, clear of the unused pins 3/4, RC and pull-up right there
+    T("EN", [("U2", 2), (143.64, 109.6), (142.0, 107.96), (142.0, 103.46), ("R11", 2)], SIG)
     # EN, BOOT and 3V3 down to the back-side pogo pads J2, right behind the module
     T("EN", [(142.0, 103.46), (142.0, 102.7)], SIG)
     b.via("EN", 142.0, 102.7)
@@ -175,9 +188,27 @@ def hand_route():
     T("BOOT", [(134.64, 107.3), (135.04, 107.7), (j3[0], 107.7), ("J2", 3)], SIG, layer=pcbnew.B_Cu)
     b.via("+3V3", 135.9, 102.2)
     T("+3V3", [(135.9, 102.2), ("J2", 2)], SIG, layer=pcbnew.B_Cu)
-    T("EN", [(142.0, 107.85), ("C7", 1)], SIG)
+    T("EN", [(142.0, 107.96), (140.8, 107.96)], SIG)
     T("GND", [("C7", 2), (140.8, 104.75)], 0.4)
     b.via("GND", 140.8, 104.75)
+    # supply sense: pin 15 straight down to the filter cap, bus to R16 and R15; one ground via
+    T("VSENSE", [("U2", 15), ("C10", 1)], SIG)
+    T("VSENSE", [("C10", 1), (b.pad_xy("R15", 2)[0] + 0.91, b.pad_xy("C10", 1)[1]), ("R15", 2)], SIG)
+    T("GND", [("R16", 2), ("C10", 2)], 0.4)
+    b.via("GND", 139.6, b.pad_xy("C10", 2)[1])
+    T("IO2", [("U2", 16), ("R12", 2)], SIG)
+    T("+3V3", [("R12", 1), (142.14, 132.55)], SIG)
+    b.via("+3V3", 142.14, 132.55)
+    # sense lines: pin 17 (SENSE_UP) to the near cell, pin 18 (SENSE_DOWN) along the bottom edge
+    # to the far one; uncrossed because the deeper line starts at the outer pin
+    T("SENSE_UP", [("U2", 17), (143.64, 136.0), (129.3 + 2.59, 136.0), ("R17", 2)], SIG)
+    T("SENSE_DOWN", [("U2", 18), (145.14, 138.6), (b.pad_xy("R18", 2)[0], 138.6), ("R18", 2)], SIG)
+    # harness: J1 to the relay's left column, straight or one 45-degree run
+    T("RET_UP", [(103.8, 125.6), ("K1", 3)])
+    T("RET_UP", [("J1", 2), (103.8, 125.6)])
+    T("HARN_UP", [("J1", 3), (104.4, 120.4), (107.4, 123.4), ("K1", 2)])
+    T("HARN_DOWN", [("J1", 1), (106.4, 130.0), (108.6, 127.8), ("K1", 4)])
+    T("HARN_DOWN", [(106.4, 130.0), ("R3", 1)])
     # sense cells: gate bus and drain link
     for q, rt, rb, cc, dz, rp, x0, yg in CELLS.values():
         g = b.fps[q].Pads()[0].GetNetname()
@@ -191,6 +222,7 @@ def hand_route():
 
 
 hand_route()
+print("hand-route corners chamfered:", b.chamfer_corners())
 # keep the bottom plane whole under the buck and the module; no top tracks under the module
 b.keepout(116.2, 102.0, 15.4, 20.0, layers=(pcbnew.B_Cu,), name="buck-plane", tracks=True, vias=False, fills=False)
 # no long bottom-layer runs down the left of the buck (they slit the plane between harness and buck)
@@ -252,13 +284,20 @@ if "--no-route" not in sys.argv:
           % (sum(1 for t_ in b.board.GetTracks() if t_.IsLocked()), locked))
     print([l for l in log.splitlines() if "completed" in l][-1][-150:])
 # extra ground vias where a top ground island would otherwise hang on one via
-for ref, pad in (("R16", 2), ("C10", 2), ("Q2", 2), ("R4", 2), ("C9", 2)):
+for ref, pad in (("Q2", 2), ("R4", 2), ("C9", 2)):
     if b.via_near("GND", ref, pad) is None:
         print("no room for a GND via at", ref, pad)
-print("micro-jogs merged:", b.straighten())
+print("unrouted after autorouting:", b.unrouted())
+print("autorouter duplicates removed:", b.remove_redundant(), "| unrouted now:", b.unrouted())
+w, still = b.widen()
+print("neck-downs widened to class width:", w, "| left narrow (no room):", still or "none")
+print("micro-jogs merged:", b.straighten(), "| unrouted now:", b.unrouted())
 for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
     b.zone("GND", layer)
+b.fill_zones()
+print("ground tracks the pours make redundant, removed:", b.remove_redundant(nets=["GND"]))
 print("stitching vias:", b.stitch("GND", pitch=3.0))
+print("unrouted before pruning:", b.unrouted())
 print("dangling vias/stubs removed:", b.prune_dangling())
 print("unrouted connections:", b.unrouted())
 b.save(PCB)
@@ -269,10 +308,10 @@ print([l.strip() for l in open(os.path.join(BUILD, "drc.rpt")) if l.startswith("
 # (TI LMR16006 11.1, Espressif ESP32-C3 hardware design guidelines). Limits in mm / vias.
 CHECKS = [("BUCK_SW", "U1.6", "L1.1", 8, 0), ("BUCK_SW", "U1.6", "D3.1", 4, 0), ("BUCK_SW", "C3.2", "U1.6", 3, 0),
           ("BUCK_CB", "C3.1", "U1.1", 3, 0), ("+12V", "C2.1", "U1.5", 3, 0), ("GND", "C2.2", "D3.2", 5, 0),
-          ("GND", "D3.2", "C4.2", 4, 0), ("BUCK_FB", "U1.3", "R9.2", 3, 0), ("BUCK_FB", "U1.3", "R10.1", 4, 0),
+          ("GND", "D3.2", "C4.2", 4, 0), ("BUCK_FB", "U1.3", "R10.1", 3, 0), ("BUCK_FB", "U1.3", "R9.2", 4.5, 0),
           ("+3V3", "U2.1", "C6.1", 4, 0), ("+3V3", "U2.1", "C5.1", 7, 0), ("+3V3", "L1.2", "U2.1", 45, 0),
           ("EN", "U2.2", "C7.1", 6, 0), ("EN", "U2.2", "R11.2", 10, 0),
-          ("GND", "R10.2", "U1.2", 10, 0), ("EN", "U2.2", "J2.1", 15, 1), ("BOOT", "U2.8", "J2.3", 15, 1)]
+          ("EN", "U2.2", "J2.1", 15, 1), ("BOOT", "U2.8", "J2.3", 15, 1)]
 pb = pcbnew.LoadBoard(PCB)
 bad = 0
 print("layout checks (routed copper):")
@@ -287,6 +326,12 @@ HOT = (119.5, 113.3, 126.0, 117.8)
 stray = foreign_copper(pb, HOT, {b.resolve(n) for n in ("BUCK_SW", "+12V", "GND", "BUCK_CB")})
 print("  %-4s no foreign copper in the buck hot loop %s" % ("ok" if not stray else "FAIL", stray or ""))
 bad += bool(stray)
+narrow = [n for n in narrow_tracks(pb, b.classes, b.rules["track"]) if n[-1] == "auto"]
+print("  %-4s no autorouted track narrower than its net class %s" % ("ok" if not narrow else "FAIL", narrow or ""))
+bad += bool(narrow)
+acute = acute_angles(pb)
+print("  %-4s no acute track joints %s" % ("ok" if not acute else "FAIL", acute or ""))
+bad += bool(acute)
 print("layout checks failed:", bad)
 render(PCB, os.path.join(BUILD, "pcb.png"), layers="F.Cu,F.SilkS,Edge.Cuts", width=2000)
 render(PCB, os.path.join(BUILD, "pcb_back.png"), layers="B.Cu,Edge.Cuts", width=2000)

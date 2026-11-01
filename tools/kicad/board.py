@@ -822,6 +822,135 @@ class Board:
                 break
         return merged
 
+    def chamfer_corners(self, c=0.4, min_turn=60.0):
+        """Cut sharp corners of the locked hand routes into two 45-degree bends.
+
+        Only plain corners: exactly two segments of one net and layer meet, no via, no pad and
+        no third track there. Each leg is cut back by `c` mm (at most 40 % of the leg).
+        Returns the number of corners cut.
+        """
+        segs = [t for t in self.board.GetTracks() if t.GetClass() != "PCB_VIA" and t.IsLocked()]
+        vias = [t for t in self.board.GetTracks() if t.GetClass() == "PCB_VIA"]
+        pads = [p for fp in self.board.GetFootprints() for p in fp.Pads()]
+        ends = {}
+        for s in segs:
+            for k in ("S", "E"):
+                pt = s.GetStart() if k == "S" else s.GetEnd()
+                ends.setdefault((s.GetNetCode(), s.GetLayer(), pt.x, pt.y), []).append((s, k))
+        cut = 0
+        for (net, layer, x, y), lst in ends.items():
+            if len(lst) != 2:
+                continue
+            pt = pcbnew.VECTOR2I(x, y)
+            if any(v.GetNetCode() == net and v.HitTest(pt) for v in vias):
+                continue
+            if any(p.GetNetCode() == net and p.IsOnLayer(layer) and p.HitTest(pt) for p in pads):
+                continue
+            if any(o.GetNetCode() == net and o.GetLayer() == layer and o not in (lst[0][0], lst[1][0])
+                   and o.HitTest(pt, 0) for o in segs):
+                continue
+            legs = []
+            for s, k in lst:
+                far = s.GetEnd() if k == "S" else s.GetStart()
+                L = math.hypot(far.x - x, far.y - y)
+                legs.append((s, k, (far.x - x) / L if L else 0, (far.y - y) / L if L else 0, L))
+            (s1, k1, ux, uy, l1), (s2, k2, vx, vy, l2) = legs
+            if l1 == 0 or l2 == 0:
+                continue
+            turn = 180.0 - math.degrees(math.acos(max(-1.0, min(1.0, ux * vx + uy * vy))))
+            d = min(MM(c), 0.4 * l1, 0.4 * l2)
+            if turn < min_turn or d < MM(0.05):
+                continue
+            a = pcbnew.VECTOR2I(int(x + ux * d), int(y + uy * d))
+            b_ = pcbnew.VECTOR2I(int(x + vx * d), int(y + vy * d))
+            (s1.SetStart if k1 == "S" else s1.SetEnd)(a)
+            (s2.SetStart if k2 == "S" else s2.SetEnd)(b_)
+            n = pcbnew.PCB_TRACK(self.board)
+            n.SetStart(a); n.SetEnd(b_); n.SetWidth(min(s1.GetWidth(), s2.GetWidth()))
+            n.SetLayer(layer); n.SetNetCode(net); n.SetLocked(True)
+            self.board.Add(n)
+            cut += 1
+        return cut
+
+    def remove_redundant(self, nets=None):
+        """Remove unlocked track segments whose removal leaves every connection intact
+        (autorouter duplicates that form loops with hand routes). Returns the number removed.
+
+        With `nets` (e.g. ["GND"]) and filled pours, it removes tracks of those nets that the
+        pour already makes redundant. The fill is not redone per removal: a removed track only
+        frees room, so whatever stays connected against the old fill stays connected.
+        """
+        want = {self.resolve(n) for n in nets} if nets else None
+        self.board.BuildConnectivity()
+        base = self.board.GetConnectivity().GetUnconnectedCount(False)
+        removed = 0
+        # Short segments are joints between two tracks whose end caps already overlap; KiCad
+        # calls them redundant, but removing them leaves a kink of overlapping copper.
+        segs = [t for t in self.board.GetTracks() if t.GetClass() != "PCB_VIA" and not t.IsLocked()
+                and t.GetLength() > 2 * t.GetWidth() and (want is None or t.GetNetname() in want)]
+        # longest first: of two parallel paths, keep the shorter one
+        segs.sort(key=lambda s: -s.GetLength())
+        for s in segs:
+            self.board.Remove(s)
+            self.board.BuildConnectivity()
+            if self.board.GetConnectivity().GetUnconnectedCount(False) > base:
+                self.board.Add(s)
+            else:
+                removed += 1
+        self.board.BuildConnectivity()
+        return removed
+
+    def _class_width(self, net):
+        for c in self.classes.values():
+            if net in c["nets"]:
+                return c["track"]
+        return self.rules["track"]
+
+    def widen(self):
+        """Autorouter neck-downs: set unlocked tracks narrower than their net class back to
+        the class width where clearance allows. Returns (widened, still_narrow list)."""
+        mm = pcbnew.ToMM
+        cls_clear = {n: c["clearance"] for c in self.classes.values() for n in c["nets"]}
+        base = self.rules["clearance"]
+        tracks = list(self.board.GetTracks())
+        pads = [p for fp in self.board.GetFootprints() for p in fp.Pads()]
+        widened, narrow = 0, []
+        for s in tracks:
+            if s.GetClass() == "PCB_VIA" or s.IsLocked():
+                continue
+            net = s.GetNetname()
+            want = MM(self._class_width(net))
+            if s.GetWidth() >= want - MM(0.005):
+                continue
+            old = s.GetWidth()
+            s.SetWidth(want)
+            shape = s.GetEffectiveShape(s.GetLayer())
+            ok = True
+            for o in tracks:
+                if o is s or o.GetNetCode() == s.GetNetCode():
+                    continue
+                if o.GetClass() != "PCB_VIA" and o.GetLayer() != s.GetLayer():
+                    continue
+                need = MM(max(cls_clear.get(net, base), cls_clear.get(o.GetNetname(), base)))
+                if o.GetEffectiveShape(s.GetLayer()).Collide(shape, need):
+                    ok = False
+                    break
+            if ok:
+                for p in pads:
+                    if p.GetNetCode() == s.GetNetCode() or not p.IsOnLayer(s.GetLayer()):
+                        continue
+                    need = MM(max(cls_clear.get(net, base), cls_clear.get(p.GetNetname(), base)))
+                    if p.GetEffectiveShape(s.GetLayer()).Collide(shape, need):
+                        ok = False
+                        break
+            if ok:
+                widened += 1
+            else:
+                s.SetWidth(old)
+                a = s.GetStart()
+                narrow.append((net, round(mm(old), 2), round(mm(a.x), 2), round(mm(a.y), 2)))
+        return widened, narrow
+
     def prune_dangling(self, rounds=10):
         """Remove unlocked vias and track stubs that lead nowhere (autorouter leftovers).
 
@@ -837,16 +966,19 @@ class Board:
             zones = [z for z in self.board.Zones() if not z.GetIsRuleArea()]
 
             def touches(pt, layer, net, me):
+                # an end counts as connected where its end cap overlaps copper of the net,
+                # the same rule KiCad's connectivity uses
+                acc = int(me.GetWidth() * 0.45) if me.GetClass() != "PCB_VIA" else 0
                 for p in pads:
-                    if p.GetNetname() == net and p.IsOnLayer(layer) and p.HitTest(pt):
+                    if p.GetNetname() == net and p.IsOnLayer(layer) and p.HitTest(pt, acc):
                         return True
                 for o in tracks:
                     if o is me or o.GetNetname() != net:
                         continue
                     if o.GetClass() == "PCB_VIA":
-                        if o.HitTest(pt):
+                        if o.HitTest(pt, acc):
                             return True
-                    elif o.GetLayer() == layer and o.HitTest(pt, 0):
+                    elif o.GetLayer() == layer and o.HitTest(pt, acc):
                         return True
                 for z in zones:
                     if z.GetNetname() == net and z.IsOnLayer(layer) and z.HitTestFilledArea(layer, pt):
@@ -868,6 +1000,12 @@ class Board:
                         gone.append(tr)
             if not gone:
                 break
+            if os.environ.get("PRUNE_DEBUG"):
+                for tr in gone:
+                    s, e = tr.GetStart(), tr.GetEnd()
+                    print("   prune", tr.GetNetname(), tr.GetClass()[4:], self.board.GetLayerName(tr.GetLayer()),
+                          (round(pcbnew.ToMM(s.x), 2), round(pcbnew.ToMM(s.y), 2)),
+                          (round(pcbnew.ToMM(e.x), 2), round(pcbnew.ToMM(e.y), 2)))
             for tr in gone:
                 self.board.Remove(tr)
             removed += len(gone)
@@ -986,6 +1124,67 @@ def foreign_copper(board, rect, allowed, layers=(pcbnew.F_Cu, pcbnew.B_Cu)):
         if hit:
             c = t.GetPosition() if t.GetClass() == "PCB_VIA" else t.GetStart()
             out.append((t.GetNetname(), lname, round(pcbnew.ToMM(c.x), 2), round(pcbnew.ToMM(c.y), 2)))
+    return out
+
+
+def acute_angles(board, limit=89.0):
+    """Joints where two tracks of a net meet at less than `limit` degrees (etch traps):
+    shared endpoints and T-junctions. Returns [(net, layer, x, y, angle)]."""
+    mm = pcbnew.ToMM
+    segs = [t for t in board.GetTracks() if t.GetClass() != "PCB_VIA"]
+    vias = [t for t in board.GetTracks() if t.GetClass() == "PCB_VIA"]
+    pads = [p for fp in board.GetFootprints() for p in fp.Pads()]
+    out = []
+
+    def covered(net, layer, pt):
+        return (any(v.GetNetCode() == net and v.HitTest(pt) for v in vias)
+                or any(p.GetNetCode() == net and p.IsOnLayer(layer) and p.HitTest(pt) for p in pads))
+
+    def vec(s, at):
+        a, b = s.GetStart(), s.GetEnd()
+        if (a.x - at.x) ** 2 + (a.y - at.y) ** 2 > (b.x - at.x) ** 2 + (b.y - at.y) ** 2:
+            a, b = b, a
+        return (b.x - a.x, b.y - a.y)          # pointing away from the joint
+
+    def angle(u, v):
+        lu, lv = math.hypot(*u), math.hypot(*v)
+        if lu == 0 or lv == 0:
+            return 180.0
+        c = (u[0] * v[0] + u[1] * v[1]) / (lu * lv)
+        return math.degrees(math.acos(max(-1.0, min(1.0, c))))
+    for i, s in enumerate(segs):
+        for pt in (s.GetStart(), s.GetEnd()):
+            for o in segs[i + 1:]:
+                if o.GetNetCode() != s.GetNetCode() or o.GetLayer() != s.GetLayer():
+                    continue
+                e = min((o.GetStart(), o.GetEnd()), key=lambda q: (q.x - pt.x) ** 2 + (q.y - pt.y) ** 2)
+                if math.hypot(e.x - pt.x, e.y - pt.y) <= max(s.GetWidth(), o.GetWidth()) / 2:
+                    ang = angle(vec(s, pt), vec(o, e))        # shared (or overlapping) end
+                elif o.HitTest(pt, 0):                         # T-junction onto o's middle
+                    d = (o.GetEnd().x - o.GetStart().x, o.GetEnd().y - o.GetStart().y)
+                    u = vec(s, pt)
+                    ang = min(angle(u, d), angle(u, (-d[0], -d[1])))
+                else:
+                    continue
+                if ang < limit and not covered(s.GetNetCode(), s.GetLayer(), pt):
+                    out.append((s.GetNetname(), board.GetLayerName(s.GetLayer()),
+                                round(mm(pt.x), 2), round(mm(pt.y), 2), round(ang)))
+    return out
+
+
+def narrow_tracks(board, classes, default):
+    """Tracks narrower than their net class (neck-downs). classes: Board.classes."""
+    mm = pcbnew.ToMM
+    want = {n: c["track"] for c in classes.values() for n in c["nets"]}
+    out = []
+    for t in board.GetTracks():
+        if t.GetClass() == "PCB_VIA":
+            continue
+        w = want.get(t.GetNetname(), default)
+        if mm(t.GetWidth()) < w - 0.005:
+            a = t.GetStart()
+            out.append((t.GetNetname(), round(mm(t.GetWidth()), 2), w, round(mm(a.x), 2), round(mm(a.y), 2),
+                        "hand" if t.IsLocked() else "auto"))
     return out
 
 

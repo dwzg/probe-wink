@@ -21,7 +21,7 @@ text { font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace
 .t-up { fill: #B8402F; } .t-down { fill: #2F6CB0; } .t-pwr { fill: #B57D0C; } .t-trig { fill: #6B4FA0; }
 </style>
 <rect x="0" y="0" width="940" height="560" fill="#FFFFFF"/>
-<title>Module rev C: lead 5 through the M7 reverse diode and TVS to the +12 V rail; LMR16006X buck to 3.3 V; 1 M / 68k supply divider to GPIO3; UP and DOWN lines through divider, filter, zener and 2N7002 buffers to GPIO0 and GPIO1 (active low); GPIO10 drives the relay coil through a 2.2k resistor and an MMBTA06 NPN with 100k pull-down and flyback diode; GPIO7 status LED; GPIO6 side jumper.</title>
+<title>Module rev C: lead 5 through the M7 reverse diode and TVS to the +12 V rail; LMR16006X buck to 3.3 V; 1 M / 68k supply divider to GPIO3; UP and DOWN lines through divider, filter, zener and 2N7002 buffers to GPIO1 (UP) and GPIO0 (DOWN), active low; GPIO10 drives the relay coil through a 2.2k resistor and an MMBTA06 NPN with 100k pull-down and flyback diode; GPIO7 status LED; GPIO6 side jumper.</title>
 <rect class="box" x="20" y="50" width="96" height="36" rx="2"/>
 <text x="68" y="72" class="t-pwr" text-anchor="middle">5 BK/W</text>
 <rect class="box" x="20" y="302" width="96" height="36" rx="2"/>
@@ -79,8 +79,8 @@ text { font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace
 <text x="650" y="210" class="lbl" text-anchor="middle">WROOM-02</text>
 <text x="570" y="154">GPIO3</text>
 <text x="570" y="239">3V3</text>
-<text x="570" y="324">GPIO0</text>
-<text x="570" y="404">GPIO1</text>
+<text x="570" y="324">GPIO1</text>
+<text x="570" y="404">GPIO0</text>
 <text x="570" y="454">GPIO6</text>
 <text x="570" y="490">GND</text>
 <text x="730" y="324" text-anchor="end">GPIO10</text>

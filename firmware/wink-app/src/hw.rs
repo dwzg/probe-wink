@@ -4,8 +4,8 @@
 //!
 //! | GPIO | Use                                                        |
 //! |------|------------------------------------------------------------|
-//! | 0    | SENSE_UP, digital in, ACTIVE LOW (MOSFET buffer, 330k pull-up), deep-sleep wake |
-//! | 1    | SENSE_DOWN, digital in, active low (same), deep-sleep wake |
+//! | 0    | SENSE_DOWN, digital in, ACTIVE LOW (MOSFET buffer, 330k pull-up), deep-sleep wake (rev C; SENSE_UP before) |
+//! | 1    | SENSE_UP, digital in, active low (same), deep-sleep wake (rev C; SENSE_DOWN before) |
 //! | 3    | VSENSE, ADC1_CH3, module +12 V via 1 MΩ / 68 kΩ            |
 //! | 4, 5 | not connected (rev C); reset to input-off + pull-up, held in sleep |
 //! | 6    | SIDE, in with pull-up: high = LH/master, low = RH/slave    |
@@ -39,8 +39,8 @@ use wink_core::voltage::AdcReading;
 
 #[cfg(not(esp32))]
 mod pins {
-    pub const SENSE_UP: u8 = 0;
-    pub const SENSE_DOWN: u8 = 1;
+    pub const SENSE_UP: u8 = 1;
+    pub const SENSE_DOWN: u8 = 0;
     pub const RELAY: i32 = 10;
     pub const VSENSE: Option<i32> = Some(3);
     /// Module pins 3 and 4 (GPIO4, GPIO5) are not connected on rev C.

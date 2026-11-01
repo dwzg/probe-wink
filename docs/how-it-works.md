@@ -186,7 +186,7 @@ One board per side, 46 × 40 mm, built around an ESP32-C3-WROOM-02:
 - **Supply:** LMR16006X buck from the +12 V rail to 3.3 V.
 - **Relay:** TE IM06GR DPDT, 12 V coil, driven by an MMBTA06 NPN from GPIO10.
 - **Sense:** each harness command line goes through a divider, filter and zener
-  clamp to a 2N7002 buffer. A live line pulls GPIO0 (UP) or GPIO1 (DOWN) low;
+  clamp to a 2N7002 buffer. A live line pulls GPIO1 (UP) or GPIO0 (DOWN) low;
   these pins also wake the chip.
 - **Supply sense:** 1 M / 68k divider to GPIO3 (ADC) for the supply gate.
 - **Other:** status LED on GPIO7, side jumper JP1 on GPIO6, native USB and

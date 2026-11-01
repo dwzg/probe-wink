@@ -214,7 +214,7 @@ s.frame(213.36, 20.32, 182.88, 144.78, "ESP32-C3-WROOM-02 (or -02U, same pads)")
 s.add("U2", "RF_Module:ESP32-C3-WROOM-02", (322.58, 91.44), "ESP32-C3-WROOM-02-N4",
       "RF_Module:ESP32-C3-WROOM-02",
       {"1": "+3V3", "2": "EN", "9": "GND", "19": "GND",
-       "18": "SENSE_UP", "17": "SENSE_DOWN", "16": "IO2", "15": "VSENSE",
+       "18": "SENSE_DOWN", "17": "SENSE_UP", "16": "IO2", "15": "VSENSE",
        "3": None, "4": None, "5": "SIDE", "6": "LED", "7": "IO8", "8": "BOOT",
        "10": "RELAY_DRV", "13": "USB_DN", "14": "USB_DP", "11": None, "12": None},
       fields=part("C2934560", "ESP32-C3-WROOM-02-N4"))
