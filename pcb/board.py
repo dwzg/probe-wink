@@ -117,6 +117,19 @@ def hand_route():
     T("+12V", [("D2", 1), (115.0, 107.6), (113.2, 109.4), ("D1", 1)], PWR)
     T("+12V", [("D1", 1), (113.9, 111.5), (113.9, 114.72), ("C11", 1), ("C1", 1), ("C2", 1)], PWR)
     T("+12V", [("TP4", 1), (113.9, 114.6)], PWR)
+    # relay coil supply: flyback diode cathode straight down into the coil pin (both pads span x 109.6)
+    T("+12V", [("TP4", 1), (109.7, 117.3)], 0.4)          # rail to the diode at 45 degrees
+    T("+12V", [(109.6, 117.3), (109.6, 120.2)], 0.4)
+    b.via("+12V", 109.6, 118.9)     # between diode and coil pin
+    # ...and on to the supply-sense divider R15 (1 M, microamps): down the back under the relay,
+    # across the 3V3 riser on top, under the relay drive on the back again, into R15
+    T("+12V", [(109.6, 118.9), (109.6, 129.5), (119.75, 129.5), (122.05, 127.2)], 0.4, layer=pcbnew.B_Cu)
+    b.via("+12V", 122.05, 127.2)
+    T("+12V", [(122.05, 127.2), (130.75, 127.2)], 0.4)
+    b.via("+12V", 130.75, 127.2)
+    T("+12V", [(130.75, 127.2), (130.75, 133.0)], 0.4, layer=pcbnew.B_Cu)
+    b.via("+12V", 130.75, 133.0)
+    T("+12V", [(130.75, 133.0), (134.09, 133.0), ("R15", 1)], 0.4)
     T("+12V", [("R8", 1), (116.5, 114.72)], SIG)
     T("+12V", [("U1", 5), ("C2", 1)], V33)
     T("BUCK_EN", [("R8", 2), ("U1", 4)], SIG)
@@ -208,6 +221,9 @@ def hand_route():
     T("RET_UP", [("J1", 2), (103.8, 125.6)])
     T("HARN_UP", [("J1", 3), (104.4, 120.4), (107.4, 123.4), ("K1", 2)])
     T("HARN_DOWN", [("J1", 1), (106.4, 130.0), (108.6, 127.8), ("K1", 4)])
+    # RET_DOWN: one 45-degree run out of J1, under the relay parallel to HARN_UP's crossover
+    T("RET_DOWN", [("J1", 4), (103.4, 116.4)])
+    T("RET_DOWN", [(103.4, 116.4), (108.4, 121.4), (111.4, 121.4), (115.6, 125.6), ("K1", 6)])
     T("HARN_DOWN", [(106.4, 130.0), ("R3", 1)])
     # sense cells: gate bus and drain link
     for q, rt, rb, cc, dz, rp, x0, yg in CELLS.values():
