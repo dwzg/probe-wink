@@ -1,0 +1,57 @@
+# probe-wink ESP-IDF configuration (ESP32-C3-WROOM-02, 4 MB flash).
+# Applied on top of the ESP-IDF defaults by esp-idf-sys at build time.
+
+# --- Flash ---------------------------------------------------------------
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+
+# --- Stacks (Rust needs more than the C defaults) --------------------------
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384
+CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE=4096
+CONFIG_FREERTOS_IDLE_TASK_STACKSIZE=4096
+CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT=8192
+CONFIG_FREERTOS_HZ=1000
+
+# --- Console / logs on the native USB (USB-Serial-JTAG, GPIO18/19) --------
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# --- Watchdogs ---------------------------------------------------------------
+# Task watchdog: the firmware subscribes its control loop; if it stalls for
+# 5 s the chip panics and resets. The relay gate pull-down drops the relay
+# during the reset.
+CONFIG_ESP_TASK_WDT_EN=y
+CONFIG_ESP_TASK_WDT_INIT=y
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=5
+CONFIG_ESP_TASK_WDT_PANIC=y
+CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0=y
+CONFIG_ESP_INT_WDT=y
+# Reboot on panic instead of halting.
+CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT=y
+
+# --- Deep sleep ----------------------------------------------------------
+# Board rev B: SENSE_UP/SENSE_DOWN have external 1 MΩ pull-ups (active-low
+# MOSFET buffers). Do not let ESP-IDF enable internal pull-up/downs on the
+# deep-sleep wake pins; they would fight the external resistors.
+CONFIG_ESP_SLEEP_GPIO_ENABLE_INTERNAL_RESISTORS=n
+
+# --- Bluetooth: NimBLE, peripheral (phone) + central (remote) ---------------
+CONFIG_BT_ENABLED=y
+CONFIG_BT_BLUEDROID_ENABLED=n
+CONFIG_BT_NIMBLE_ENABLED=y
+CONFIG_BT_NIMBLE_ROLE_PERIPHERAL=y
+CONFIG_BT_NIMBLE_ROLE_CENTRAL=y
+CONFIG_BT_NIMBLE_ROLE_OBSERVER=y
+CONFIG_BT_NIMBLE_ROLE_BROADCASTER=y
+# phone + remote + one spare
+CONFIG_BT_NIMBLE_MAX_CONNECTIONS=3
+CONFIG_BT_NIMBLE_MAX_BONDS=6
+# Bonds survive deep sleep / power loss.
+CONFIG_BT_NIMBLE_NVS_PERSIST=y
+CONFIG_BT_NIMBLE_SECURITY_ENABLE=y
+CONFIG_BT_NIMBLE_SM_SC=y
+CONFIG_BT_NIMBLE_SM_LEGACY=y
+CONFIG_BT_NIMBLE_HOST_TASK_STACK_SIZE=8192
+CONFIG_BT_NIMBLE_GAP_DEVICE_NAME_MAX_LEN=31
+
+# --- Wi-Fi (ESP-NOW only, station mode, never associates) -------------------
+CONFIG_ESP_COEX_SW_COEXIST_ENABLE=y

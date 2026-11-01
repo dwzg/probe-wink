@@ -1,0 +1,9 @@
+# probe-wink partition table, 4 MB flash (ESP32-C3-WROOM-02).
+# Two OTA app slots so Wi-Fi OTA (TODO) can be added without reflashing the
+# table. Without OTA data the bootloader boots ota_0, where espflash writes.
+# Name,   Type, SubType, Offset,   Size,     Flags
+nvs,      data, nvs,     0x9000,   0x6000,
+otadata,  data, ota,     0xf000,   0x2000,
+phy_init, data, phy,     0x11000,  0x1000,
+ota_0,    app,  ota_0,   0x20000,  0x1E0000,
+ota_1,    app,  ota_1,   0x200000, 0x1E0000,

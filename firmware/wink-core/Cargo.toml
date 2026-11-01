@@ -1,0 +1,12 @@
+[package]
+name = "wink-core"
+description = "Pure logic of the probe-wink headlamp module (no ESP dependencies, no_std)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+# HMAC-SHA256 for the ESP-NOW link. Pure Rust, no_std.
+hmac = { version = "0.12.1", default-features = false }
+sha2 = { version = "0.10.9", default-features = false }

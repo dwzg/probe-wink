@@ -1,0 +1,25 @@
+[package]
+name = "wink-app"
+description = "ESP32-C3 firmware for the probe-wink headlamp modules (LH master / RH slave)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "wink-app"
+harness = false # no built-in test harness on the target
+
+[dependencies]
+wink-core = { path = "../wink-core" }
+log = "0.4"
+anyhow = "1"
+esp-idf-svc = { version = "0.53", features = ["critical-section"] }
+esp32-nimble = "0.13"
+
+[build-dependencies]
+embuild = "0.33.5"
+
+[lints.rust]
+# Chip flags emitted by esp-idf-sys through build.rs (embuild).
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(esp32)", "cfg(esp32c3)", "cfg(esp_idf_soc_temp_sensor_supported)"] }

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Build (and optionally flash) the firmware for the ESP32 DEVKITV1 test bench.
+#
+#   scripts/devkit build            # build only
+#   scripts/devkit flash [PORT]     # build, flash, open the monitor (default /dev/ttyUSB0)
+#
+# Needs the Xtensa Rust toolchain from espup (`espup install --targets esp32`)
+# and the usual secrets: WINK_ESPNOW_KEY, WINK_BLE_PASSKEY (see README).
+# The custom ESP32-C3 board builds with plain `cargo build` as before.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+for f in "${ESPUP_EXPORT_FILE:-}" "$HOME/export-esp.sh"; do
+    if [ -n "$f" ] && [ -f "$f" ]; then
+        # shellcheck disable=SC1090
+        . "$f"
+        break
+    fi
+done
+# Secrets: environment first, else the git-ignored firmware/.envrc.
+if [ -z "${WINK_ESPNOW_KEY:-}" ] && [ -f .envrc ]; then
+    # shellcheck disable=SC1091
+    . ./.envrc
+fi
+: "${WINK_ESPNOW_KEY:?set WINK_ESPNOW_KEY (64 hex chars), see README}"
+: "${WINK_BLE_PASSKEY:?set WINK_BLE_PASSKEY (6 digits), see README}"
+
+export MCU=esp32
+target=xtensa-esp32-espidf
+cargo +esp build -p wink-app --release --target "$target"
+elf="target/$target/release/wink-app"
+
+case "${1:-build}" in
+    build) echo "built $elf" ;;
+    flash) espflash flash --monitor --chip esp32 ${2:+--port "$2"} "$elf" ;;
+    *) echo "usage: $0 build|flash [PORT]" >&2; exit 2 ;;
+esac

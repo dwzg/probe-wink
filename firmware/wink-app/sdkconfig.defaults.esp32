@@ -1,0 +1,12 @@
+# ESP32 DEVKITV1 (ESP-WROOM-32) test bench: layered on top of sdkconfig.defaults
+# by esp-idf-sys when MCU=esp32 (scripts/devkit).
+
+# Console on UART0 (the devkit's CP2102/CH340 USB bridge); the classic ESP32
+# has no USB-Serial-JTAG.
+CONFIG_ESP_CONSOLE_UART_DEFAULT=y
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=n
+
+# Bluetooth controller in BLE-only mode (NimBLE host; no Classic BT).
+CONFIG_BTDM_CTRL_MODE_BLE_ONLY=y
+CONFIG_BTDM_CTRL_MODE_BR_EDR_ONLY=n
+CONFIG_BTDM_CTRL_MODE_BTDM=n
