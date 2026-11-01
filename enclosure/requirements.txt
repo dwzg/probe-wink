@@ -1,0 +1,5 @@
+# python3 -m venv enclosure/.venv && enclosure/.venv/bin/pip install -r enclosure/requirements.txt
+build123d==0.13.0
+numpy==2.5.4
+scipy==1.18.1
+matplotlib==3.11.2
