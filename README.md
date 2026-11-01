@@ -9,7 +9,10 @@ the car behaves exactly as stock. The LH module talks to a phone and a BLE
 remote; the RH module follows it over an authenticated ESP-NOW link. Power
 comes from the retractor's own feed; no wires go into the cabin.
 
-![The module housing: 84 × 45 × 22 mm, M12 cable gland, four mounting ears](docs/img/housing-closed.png)
+<p>
+  <img src="docs/img/pcb.png" width="49%" alt="The module PCB: 46 × 40 mm, 2 layers, ESP32-C3 module with the antenna over the right edge, swap relay K1, 12 V buck">
+  <img src="docs/img/housing-closed.png" width="49%" alt="The module housing: 84 × 45 × 22 mm, M12 cable gland, four mounting ears">
+</p>
 
 ## Status
 
