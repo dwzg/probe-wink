@@ -74,7 +74,10 @@ make enclosure   # board geometry -> housing STEP/STL -> checks -> renders (need
 The first step exports the board's 3D model and geometry with `kicad-cli`
 (`pcb/export_enclosure.py`). The outputs land in `enclosure/build/`:
 `housing-base.stl`, `housing-lid.stl` (already in print orientation) and STEP
-files. `enclosure/check.py` measures the result (interference, gasket groove,
+files. The base and lid STEP and STL files are also written to
+`enclosure/models/`, which is committed, so the current files can be printed
+without building; commit them together with the source change that produced
+them (the M16 variant writes `*-m16.*` there). `enclosure/check.py` measures the result (interference, gasket groove,
 screws, lid stiffness, overhangs) and fails on any violation; it takes a few
 minutes.
 

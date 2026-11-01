@@ -45,7 +45,7 @@ retractor sends that lamp the opposite way. Details:
 |-----------------|--------------------------------------------------------------|
 | `docs/`         | documentation and diagrams                                   |
 | `pcb/`          | KiCad project, generated from Python (`schematic.py`, `check.py`, `board.py`, `fab.py`, `export_enclosure.py`); [README](pcb/README.md) |
-| `enclosure/`    | 3D-printable housing in build123d (`housing.py`, `check.py`, `render.py`) |
+| `enclosure/`    | 3D-printable housing in build123d (`housing.py`, `check.py`, `render.py`); current STEP/STL in `enclosure/models/` |
 | `firmware/`     | Rust on ESP-IDF for the ESP32-C3; [README](firmware/README.md) |
 | `android/`      | Android app with home-screen widgets; [README](android/README.md) |
 | `tools/hw-design/` | submodule: [hw-design](https://github.com/dwzg/hw-design), the KiCad and build123d library used by `pcb/` and `enclosure/` |

@@ -3,7 +3,8 @@
 
 Inputs : build/board.json and build/probe-wink-board.step (pcb/export_enclosure.py)
 Outputs: build/housing-base.{step,stl}, build/housing-lid.{step,stl} (lid STL in print
-         orientation), build/gasket-tpu.stl, build/assembly.step, build/assembly-cut.step
+         orientation), build/gasket-tpu.stl, build/assembly.step, build/assembly-cut.step;
+         base and lid STEP/STL also to models/ (committed)
 Checks : check.py (interference, groove, screws, fingers, lid FE, print overhangs)
 
 Concept
@@ -60,6 +61,8 @@ from build123d import (Align, Axis, Box, Circle, Compound, Cylinder, Plane, Poly
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 B = os.path.join(HERE, "build")
+MODELS = os.path.join(HERE, "models")    # committed copies of base and lid (STEP + STL)
+STEP_TIME = "2000-01-01T00:00:00"        # fixed STEP header time: an unchanged rerun leaves git clean
 board = json.load(open(os.path.join(B, "board.json")))
 parts = {p["ref"]: p for p in board["parts"]}
 BOTTOM_REFS = {"J2", "TP1", "TP2", "JP1"}   # bare pads on the bottom side (rev C)
@@ -421,11 +424,15 @@ def build(gland=GLAND, n_mid=N_MID, lid_t=LID, skirt_d=SKIRT_D, ant_air=ANT_AIR,
 
 
 def export(h):
-    os.makedirs(B, exist_ok=True)
-    export_step(h.base, os.path.join(B, "housing-base.step"))
-    export_stl(h.base, os.path.join(B, "housing-base.stl"))
-    export_step(h.lid, os.path.join(B, "housing-lid.step"))
-    export_stl(h.lid.rotate(Axis.X, 180), os.path.join(B, "housing-lid.stl"))
+    # build/ gets everything; models/ (in git) gets base and lid, M16 variant as *-m16.*
+    sfx = "" if h.gland == "M12" else "-" + h.gland.lower()
+    lid_print = h.lid.rotate(Axis.X, 180)
+    for d, s in ((B, ""), (MODELS, sfx)):
+        os.makedirs(d, exist_ok=True)
+        export_step(h.base, os.path.join(d, "housing-base%s.step" % s), timestamp=STEP_TIME)
+        export_stl(h.base, os.path.join(d, "housing-base%s.stl" % s))
+        export_step(h.lid, os.path.join(d, "housing-lid%s.step" % s), timestamp=STEP_TIME)
+        export_stl(lid_print, os.path.join(d, "housing-lid%s.stl" % s))
     export_stl(h.gasket, os.path.join(B, "gasket-tpu.stl"))
     asm = Compound(children=[h.base, h.lid, h.pcb, *h.extras])
     export_step(asm, os.path.join(B, "assembly.step"))
