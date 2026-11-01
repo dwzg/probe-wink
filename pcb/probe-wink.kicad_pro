@@ -1,0 +1,140 @@
+{
+  "meta": {
+    "filename": "probe-wink.kicad_pro",
+    "version": 1
+  },
+  "board": {
+    "design_settings": {
+      "rules": {
+        "min_track_width": 0.12,
+        "min_clearance": 0.2,
+        "min_through_hole_diameter": 0.2,
+        "min_via_diameter": 0.5,
+        "min_via_annular_width": 0.1,
+        "min_copper_edge_clearance": 0.3,
+        "min_silk_clearance": 0.15
+      }
+    }
+  },
+  "net_settings": {
+    "classes": [
+      {
+        "name": "Default",
+        "track_width": 0.25,
+        "clearance": 0.2,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "diff_pair_width": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "wire_width": 6,
+        "bus_width": 12,
+        "line_style": 0,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 2147483647
+      },
+      {
+        "name": "Power",
+        "track_width": 0.4,
+        "clearance": 0.2,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "diff_pair_width": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "wire_width": 6,
+        "bus_width": 12,
+        "line_style": 0,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 0
+      },
+      {
+        "name": "Supply3V3",
+        "track_width": 0.3,
+        "clearance": 0.2,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "diff_pair_width": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "wire_width": 6,
+        "bus_width": 12,
+        "line_style": 0,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 1
+      },
+      {
+        "name": "Harness",
+        "track_width": 0.4,
+        "clearance": 0.5,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "diff_pair_width": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "wire_width": 6,
+        "bus_width": 12,
+        "line_style": 0,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 2
+      }
+    ],
+    "meta": {
+      "version": 4
+    },
+    "netclass_patterns": [
+      {
+        "netclass": "Power",
+        "pattern": "+12V"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "/VBAT_IN"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "GND"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "Net-(D3-K)"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "Net-(D4-A)"
+      },
+      {
+        "netclass": "Supply3V3",
+        "pattern": "+3V3"
+      },
+      {
+        "netclass": "Harness",
+        "pattern": "/HARN_UP"
+      },
+      {
+        "netclass": "Harness",
+        "pattern": "/HARN_DOWN"
+      },
+      {
+        "netclass": "Harness",
+        "pattern": "/RET_UP"
+      },
+      {
+        "netclass": "Harness",
+        "pattern": "/RET_DOWN"
+      }
+    ]
+  }
+}
