@@ -19,9 +19,9 @@ firmware/**/target/
 firmware/**/.embuild/
 
 # Android
-app/android/.gradle/
-app/android/.kotlin/
-app/android/local.properties
+android/.gradle/
+android/.kotlin/
+android/local.properties
 *.apk
 
 # Local secrets (ESP-NOW key, BLE passkey)

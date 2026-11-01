@@ -12,12 +12,9 @@ only reach the LH module while it is awake.
 The phone talks to the **LH module only**. It advertises as `PWink` (GAP name
 `ProbeWink`).
 
-- **Web page** ([app/web/](../app/web/README.md)): one page, Web Bluetooth,
-  installs to the Android home screen. Works in Chrome or Edge on Android and
-  desktop; not on iOS and not in Firefox. Has a demo mode without a module.
-- **Android app**: native app with home-screen widgets that wink in one tap
-  without opening the app; see [app/android/README.md](../app/android/README.md)
-  (`app/android/`).
+- **Android app** ([android/](../android/README.md)): setup, all commands,
+  remote pairing, and home-screen widgets that wink in one tap without opening
+  the app.
 - **nRF Connect** or any BLE tool works for testing: write the commands below
   as text to the command characteristic.
 

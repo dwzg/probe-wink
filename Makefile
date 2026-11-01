@@ -35,8 +35,8 @@ devkit:
 	firmware/scripts/devkit build
 
 android:
-	cd app/android && ./gradlew assembleDebug
+	cd android && ./gradlew assembleDebug
 
 test:
 	cd firmware/wink-core && cargo test --target x86_64-unknown-linux-gnu
-	cd app/android && ./gradlew testDebugUnitTest
+	cd android && ./gradlew testDebugUnitTest

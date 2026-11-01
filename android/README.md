@@ -15,7 +15,7 @@ Google Play services).
 ## Build and install
 
 ```sh
-cd app/android
+cd android
 ./gradlew assembleDebug                       # app/build/outputs/apk/debug/app-debug.apk
 ./gradlew installDebug                        # phone on USB with USB debugging on
 ./gradlew testDebugUnitTest lintDebug         # protocol tests + lint

@@ -10,7 +10,7 @@ target; the per-part READMEs have the details.
 | PCB       | `make pcb`       | [pcb/README.md](../pcb/README.md)           |
 | Housing   | `make enclosure` | `enclosure/housing.py` (docstring)          |
 | Firmware  | `make firmware`  | [firmware/README.md](../firmware/README.md) |
-| Phone page | none (static)   | [app/web/README.md](../app/web/README.md)   |
+| Android app | `make android` | [android/README.md](../android/README.md)   |
 
 ## 1. The PCB
 
@@ -137,17 +137,13 @@ cargo run -p wink-app --release     # flash + serial monitor
 
 The side (LH or RH) comes from JP1, not from the image.
 
-## 5. The phone page
-
-Static files, no build step. Host `app/web/` on GitHub Pages or any HTTPS
-server, or test locally:
+## 5. The Android app
 
 ```sh
-cd app/web && python3 -m http.server 8000
-# open http://localhost:8000/?demo=1
+cd android && ./gradlew installDebug    # phone on USB with USB debugging on
 ```
 
-Details, including Pages setup: [app/web/README.md](../app/web/README.md).
+Needs the Android SDK and a JDK 25; details in [android/README.md](../android/README.md).
 
 ## Before ordering
 

@@ -95,7 +95,7 @@ bridged (RH, slave). Same image.
 ## ESP32 DEVKITV1 test bench
 
 The same firmware builds for an ESP32 DEVKITV1 (ESP-WROOM-32, Xtensa) to test
-BLE (phone page, passkey pairing, bonding), the BLE remote and the control logic
+BLE (Android app, passkey pairing, bonding), the BLE remote and the control logic
 before the custom board exists. The chip is selected by `MCU`; the code switches
 on the `esp32` / `esp32c3` cfg flags that esp-idf-sys emits (`hw.rs`, `sleep.rs`),
 and `wink-app/sdkconfig.defaults.esp32` is layered on top of the shared defaults.

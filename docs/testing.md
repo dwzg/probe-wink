@@ -6,7 +6,7 @@
 |---------------------------|---------------------------------------------------------|
 | Firmware logic (`wink-core`) | host unit tests (`make test`)                        |
 | Firmware on a chip        | ESP32 DEVKITV1 test bench (below)                       |
-| Phone page                | headless Chrome: demo mode, and the real code path against a mocked `navigator.bluetooth` |
+| Android app               | protocol unit tests and Android lint; not yet run on a phone |
 | PCB                       | ERC, netlist comparison, DRC and layout checks only; not built |
 | Housing                   | `enclosure/check.py` measurements on the model; not printed |
 | Module on the car         | nothing yet                                             |
@@ -14,7 +14,7 @@
 ## ESP32 devkit test bench
 
 The firmware also builds for an ESP32 DEVKITV1 (ESP-WROOM-32). That tests BLE
-(phone page, passkey pairing, bonding), the BLE remote and the control logic
+(Android app, passkey pairing, bonding), the BLE remote and the control logic
 before the custom board exists.
 
 ```sh
