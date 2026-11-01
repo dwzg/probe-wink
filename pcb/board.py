@@ -225,7 +225,7 @@ back_text("RH", x + 0.65, y + 2.2)
 for ref, lab in (("TP1", "D-"), ("TP2", "D+")):
     x, y = b.pad_xy(ref, 1)
     back_text(lab, x - 1.0, y, justify="left")
-for i, line in enumerate(["PROBE WINK  rev " + REV, "github.com/dwzg/probe-wink", "",
+for i, line in enumerate(["PROBE WINK  rev " + REV, "github.com/dwzg/probe-wink", "CERN-OHL-P-2.0",
                           "J1: DN UP  harness BK/BL BK/R in",
                           "    rU rD  to retractor BK/R BK/BL",
                           "    12V GND  BK/W BK taps (1 A fuse)",

@@ -84,4 +84,5 @@ the Rust toolchain): [docs/building.md](docs/building.md).
 - **Software** (`firmware/`, `android/`, `tools/`, and the generator scripts in
   `pcb/` and `enclosure/`): [MIT](LICENSE).
 - **Hardware design** (the KiCad files in `pcb/`, the housing models built by
-  `enclosure/`): not decided yet.
+  `enclosure/`): [CERN-OHL-P-2.0](LICENSE-HARDWARE), the permissive CERN Open
+  Hardware Licence. Source location: <https://github.com/dwzg/probe-wink>.
