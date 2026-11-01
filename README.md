@@ -56,7 +56,7 @@ retractor sends that lamp the opposite way. Details:
 ```sh
 make pcb         # schematic -> ERC/netlist check -> board (route, DRC, layout checks) -> JLCPCB files
 make enclosure   # board geometry -> housing STEP/STL -> enclosure checks -> renders
-make firmware    # module firmware; needs WINK_ESPNOW_KEY and WINK_BLE_PASSKEY
+make firmware    # module firmware; needs WINK_BLE_PASSKEY (couple the modules in the app)
 make devkit      # the same firmware for an ESP32 DEVKITV1 test bench
 make android     # Android app, debug APK
 make test        # firmware logic tests + Android unit tests

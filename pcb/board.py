@@ -82,7 +82,8 @@ def near(ref, tgt, rots=(0, 90, 180, 270)):
 # ---- module top strip: EN discharge diode, side jumper, LED, strap pull-ups
 # ---- relay driver at the coil pins
 b.place("Q1", 119.3, 123.6, 90)            # below the buck's solid-plane area, collector up to the coil
-near("R5", ("Q1", 1)); near("R6", ("Q1", 1))
+b.place("R5", 119.33, 126.56, 180)        # input (RELAY_DRV) to the right, toward the drive trace
+near("R6", ("Q1", 1))
 # ---- sense buffers (UP, DOWN) and supply divider below the module, near their pins
 # USB pogo pads on the back (bare copper), right under their pins
 b.place("TP1", 137.64, 131.2, 0, back=True); b.place("TP2", 139.9, 133.0, 0, back=True)
@@ -152,13 +153,18 @@ def hand_route():
     b.via("SIDE", 139.14, 108.5)
     T("SIDE", [(139.14, 108.5), ("JP1", 1)], SIG, layer=pcbnew.B_Cu)
     # relay drive: module pin 10 along the open strip above the sense cells to the base resistor
-    T("RELAY_DRV", [("U2", 10), (133.14, 128.7), (118.41, 128.7), ("R5", 1)], SIG)
+    T("RELAY_DRV", [("U2", 10), (133.14, 128.7), (b.pad_xy("R5", 1)[0], 128.7), ("R5", 1)], SIG)
+    # 3V3 for the pull-ups below the module and in the sense cells: from the output caps via TP3,
+    # with a via there so the bottom loads do not get fed from the far side of the board
+    T("+3V3", [("C13", 1), (127.95, 122.4), ("TP3", 1)], SIG)
+    T("+3V3", [("TP3", 1), (129.8, 123.4)], SIG)
+    b.via("+3V3", 129.8, 123.4)
     T("GND", [("C5", 2), ("C6", 2)], 0.5)
     b.via("GND", 142.85, 106.25)
     b.via("GND", 142.85, 103.4)
     T("GND", [("C5", 2), (142.85, 103.4)], 0.5)
     # EN: up from pin 2, jog left over the unused pins 3/4, RC and pull-up right there
-    T("EN", [("U2", 2), (143.64, 109.15), (143.3, 108.85), (142.0, 108.85), (142.0, 103.46), ("R11", 2)], SIG)
+    T("EN", [("U2", 2), (143.64, 108.85), (142.0, 108.85), (142.0, 103.46), ("R11", 2)], SIG)
     # EN, BOOT and 3V3 down to the back-side pogo pads J2, right behind the module
     T("EN", [(142.0, 103.46), (142.0, 102.7)], SIG)
     b.via("EN", 142.0, 102.7)
@@ -166,7 +172,7 @@ def hand_route():
     T("BOOT", [("U2", 8), (134.64, 107.3), ("R14", 2)], SIG)
     b.via("BOOT", 134.64, 107.3)
     j3 = b.pad_xy("J2", 3)
-    T("BOOT", [(134.64, 107.3), (135.04, 107.7), (j3[0] - 0.6, 107.7), ("J2", 3)], SIG, layer=pcbnew.B_Cu)
+    T("BOOT", [(134.64, 107.3), (135.04, 107.7), (j3[0], 107.7), ("J2", 3)], SIG, layer=pcbnew.B_Cu)
     b.via("+3V3", 135.9, 102.2)
     T("+3V3", [(135.9, 102.2), ("J2", 2)], SIG, layer=pcbnew.B_Cu)
     T("EN", [(142.0, 107.85), ("C7", 1)], SIG)
@@ -187,6 +193,8 @@ def hand_route():
 hand_route()
 # keep the bottom plane whole under the buck and the module; no top tracks under the module
 b.keepout(116.2, 102.0, 15.4, 20.0, layers=(pcbnew.B_Cu,), name="buck-plane", tracks=True, vias=False, fills=False)
+# no long bottom-layer runs down the left of the buck (they slit the plane between harness and buck)
+b.keepout(113.5, 106.8, 2.7, 15.2, layers=(pcbnew.B_Cu,), name="left-plane", tracks=True, vias=False, fills=False)
 b.keepout(132.4, 111.3, 13.6, 15.4, layers=(pcbnew.F_Cu, pcbnew.B_Cu), name="module-plane",
           tracks=True, vias=False, fills=False)    # GND stitching under the module is wanted
 
@@ -197,7 +205,7 @@ print("outside board:", outside or "none")
 # ---- silkscreen (JLC minimum: 1.0 mm text, 0.15 mm line)
 TXT = dict(size=1.0, thickness=0.15)
 # J1 legend: a fixed column right of the pads, one label per pad, same height as its pad
-for n, lab in zip(range(1, 7), ["DN", "UP", "rU", "rD", "12V", "GND"]):
+for n, lab in zip(range(1, 7), ["DN", "rU", "UP", "rD", "12V", "GND"]):
     x, y = b.pad_xy("J1", n)
     b.text(lab, x + 1.6, y + (0.3 if lab == "GND" else 0), justify="left", **TXT)
 b.clip_silk("U2")
@@ -224,11 +232,11 @@ x, y = b.pad_xy("JP1", 1)
 back_text("RH", x + 0.65, y + 2.2)
 for ref, lab in (("TP1", "D-"), ("TP2", "D+")):
     x, y = b.pad_xy(ref, 1)
-    back_text(lab, x - 1.0, y, justify="left")
+    back_text(lab, x + 1.1, y, justify="right")      # mirrored: reads to the right of the pad
 for i, line in enumerate(["PROBE WINK  rev " + REV, "github.com/dwzg/probe-wink", "CERN-OHL-P-2.0",
-                          "J1: DN UP  harness BK/BL BK/R in",
-                          "    rU rD  to retractor BK/R BK/BL",
-                          "    12V GND  BK/W BK taps (1 A fuse)",
+                          "J1: 1 DN  2 rU  3 UP  4 rD",
+                          "    5 12V (1 A fuse)  6 GND",
+                          "UP/DN switch, rU/rD retractor",
                           "JP1 bridged = RH (slave)"]):
     if line:
         back_text(line, 135.0, 123.0 + i * 1.8, justify="left")
@@ -247,6 +255,7 @@ if "--no-route" not in sys.argv:
 for ref, pad in (("R16", 2), ("C10", 2), ("Q2", 2), ("R4", 2), ("C9", 2)):
     if b.via_near("GND", ref, pad) is None:
         print("no room for a GND via at", ref, pad)
+print("micro-jogs merged:", b.straighten())
 for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
     b.zone("GND", layer)
 print("stitching vias:", b.stitch("GND", pitch=3.0))

@@ -3,8 +3,8 @@
 //! ESP-NOW broadcast frames are not encrypted, and the two modules do not
 //! know each other's MAC address in advance, so authentication is done here:
 //!
-//! - Both modules share a 32-byte secret, compiled in from the environment
-//!   variable `WINK_ESPNOW_KEY` (see the README).
+//! - Both modules share a 32-byte link key, written to both by the phone when
+//!   coupling them (wink-app `coupling.rs`) and kept in NVS.
 //! - Every frame carries the sender role, an *epoch* and a sequence number,
 //!   and ends in a 16-byte tag: HMAC-SHA256(key, header ‖ body), truncated.
 //! - The master bumps its epoch once per boot and stores it in NVS; the
@@ -294,7 +294,7 @@ impl Counter {
 pub const fn parse_key_hex(s: &str) -> Key {
     let b = s.as_bytes();
     if b.len() != 2 * KEY_LEN {
-        panic!("WINK_ESPNOW_KEY must be exactly 64 hex characters");
+        panic!("key must be exactly 64 hex characters");
     }
     let mut out = [0u8; KEY_LEN];
     let mut i = 0;
@@ -310,7 +310,7 @@ const fn hex_nibble(c: u8) -> u8 {
         b'0'..=b'9' => c - b'0',
         b'a'..=b'f' => c - b'a' + 10,
         b'A'..=b'F' => c - b'A' + 10,
-        _ => panic!("WINK_ESPNOW_KEY contains a non-hex character"),
+        _ => panic!("key contains a non-hex character"),
     }
 }
 

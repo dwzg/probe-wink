@@ -52,8 +52,8 @@ Sheathed 6 × 0.5 mm² cable, for example LiYY 6×0.5 (about 6.2 mm OD).
    | J1 | Silkscreen | Goes to                               |
    |----|------------|---------------------------------------|
    | 1  | DN         | harness BK/BL (DOWN from the switch)  |
-   | 2  | UP         | harness BK/R (UP from the switch)     |
-   | 3  | rU         | retractor BK/R (UP input)             |
+   | 2  | rU         | retractor BK/R (UP input)             |
+   | 3  | UP         | harness BK/R (UP from the switch)     |
    | 4  | rD         | retractor BK/BL (DOWN input)          |
    | 5  | 12V        | BK/W tap, through the 1 A fuse        |
    | 6  | GND        | BK tap                                |
@@ -114,17 +114,17 @@ on its underside.
 
 ## 4. The firmware
 
-Rust on ESP-IDF, one image for both modules. The build needs two secrets:
+Rust on ESP-IDF, one image for both modules. The build needs one secret, the
+BLE passkey your phone enters when pairing:
 
 ```sh
-export WINK_ESPNOW_KEY=$(openssl rand -hex 32)       # master <-> slave HMAC key
 export WINK_BLE_PASSKEY=$(python3 -c 'import secrets; print(f"{secrets.randbelow(10**6):06}")')
 make firmware
 ```
 
-Keep both values safe (password manager, or a git-ignored `firmware/.envrc`,
-which `make` picks up). Both modules must be flashed from a build with the same
-key. Toolchain setup and flashing: [firmware/README.md](../firmware/README.md).
+Keep it safe (password manager, or the git-ignored `firmware/.envrc`, which
+`make` picks up). The link key between the two modules is not built in: after
+flashing, couple them in the Android app (Settings → Couple modules).
 
 **Flashing a module.** Over the C3's native USB: D−/D+ on the back pads TP1/TP2,
 3.3 V and GND on TP3/TP5. Feed 3.3 V only, never 5 V. ROM download mode works

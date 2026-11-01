@@ -52,8 +52,8 @@ fits the retractor at the other:
 | Lead wire | Silkscreen at J1 | Adapter connection                          |
 |-----------|------------------|---------------------------------------------|
 | 1         | DN               | BK/BL from the car's plug (DOWN from the switch) |
-| 2         | UP               | BK/R from the car's plug (UP from the switch)    |
-| 3         | rU               | BK/R pin of the retractor (UP input)        |
+| 2         | rU               | BK/R pin of the retractor (UP input)        |
+| 3         | UP               | BK/R from the car's plug (UP from the switch)    |
 | 4         | rD               | BK/BL pin of the retractor (DOWN input)     |
 | 5         | 12V              | BK/W tap, through the 1 A fuse              |
 | 6         | GND              | BK tap                                      |
@@ -110,11 +110,14 @@ housing, and mark the lid (it carries an "L / R" field).
 2. Plug both adapters in, LH module on the LH retractor. Reconnect the battery.
 3. Check stock behaviour: with the modules asleep or idle, both lamps follow the
    headlamp switch exactly as before.
-4. Flick the switch to wake the modules. The LH module now advertises as
-   `PWink` for 15 minutes.
-5. Pair the phone with the LH module ([using.md](using.md#phone)), then
-   optionally a BLE remote.
-6. Run the in-car checks in [testing.md](testing.md#in-the-car).
+4. Flick the switch to wake the modules. They now advertise as `PWink-L` and
+   `PWink-R` for 15 minutes.
+5. In the Android app, Settings: choose the LH module, then **Couple modules**:
+   choose the RH module and tap Couple. Android asks for the passkey once per
+   module. The app writes one new random key to both and checks that the LH
+   module hears the RH one. Until then only the LH lamp can move.
+6. Optionally pair a BLE remote (Settings → Pair a remote).
+7. Run the in-car checks in [testing.md](testing.md#in-the-car).
 
 ## If something goes wrong
 

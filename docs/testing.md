@@ -19,7 +19,7 @@ before the custom board exists.
 
 ```sh
 espup install --targets esp32        # once: Xtensa Rust toolchain
-export WINK_ESPNOW_KEY=... WINK_BLE_PASSKEY=...
+export WINK_BLE_PASSKEY=...
 make devkit                          # build only
 firmware/scripts/devkit flash /dev/ttyUSB0   # build, flash, serial monitor
 ```

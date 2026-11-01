@@ -86,8 +86,8 @@ After routing, `board.py` measures the routed copper between pad pairs
 
 - **Swap:** K1 pole 1 (COM 3 / NC 2 / NO 4) feeds the retractor's UP input, pole 2
   (COM 6 / NC 7 / NO 5) its DOWN input. At rest NC passes the stock lines through;
-  energized, they cross. Lead wires: 1 harness BK/BL (DOWN), 2 harness BK/R (UP),
-  3 to retractor BK/R, 4 to retractor BK/BL, 5 BK/W tap (1 A fuse in the adapter), 6 BK.
+  energized, they cross. Lead wires: 1 harness BK/BL (DOWN), 2 to retractor BK/R,
+  3 harness BK/R (UP), 4 to retractor BK/BL, 5 BK/W tap (1 A fuse in the adapter), 6 BK.
 - **Input:** M7 reverse diode, SMCJ30A TVS (a load dump ends at the 1 A tap fuse), 22 µF
   bulk electrolytic, 2 × 2.2 µF + 100 nF ceramics.
 - **Buck:** LMR16006X at 0.7 MHz, 22 µH (SWPA5040S), PMEG10010ELR catch diode (Schottky

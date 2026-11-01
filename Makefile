@@ -2,7 +2,7 @@
 #
 #   make pcb         schematic -> ERC/netlist check -> board (place, route, DRC, layout checks) -> fab files
 #   make enclosure   board geometry -> housing (STEP/STL) -> enclosure checks -> renders
-#   make firmware    ESP32-C3 module firmware (needs WINK_ESPNOW_KEY / WINK_BLE_PASSKEY or firmware/.envrc)
+#   make firmware    ESP32-C3 module firmware (needs WINK_BLE_PASSKEY or firmware/.envrc)
 #   make devkit      the same firmware for an ESP32 DEVKITV1 test bench
 #   make android     Android app (debug APK)
 #   make test        firmware core tests + Android unit tests

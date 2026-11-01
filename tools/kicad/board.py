@@ -730,6 +730,98 @@ class Board:
         with open(pro_path, "w") as f:
             json.dump(data, f, indent=2)
 
+    def straighten(self, tol=0.12, rounds=20):
+        """Merge autorouter micro-jogs: two unlocked segments meeting at a plain bend
+        (no pad, via or T-junction there) become one when the bend deviates less than
+        `tol` mm from the straight line, and the straight segment keeps its clearance
+        to every other net. Returns the number of merges. Run before the pours.
+        """
+        mm = pcbnew.ToMM
+        cls_clear = {}
+        for c in self.classes.values():
+            for n in c["nets"]:
+                cls_clear[n] = c["clearance"]
+        base = self.rules["clearance"]
+
+        def clear_of(net):
+            return cls_clear.get(net, base)
+
+        merged = 0
+        for _ in range(rounds):
+            tracks = [t for t in self.board.GetTracks()]
+            segs = [t for t in tracks if t.GetClass() != "PCB_VIA"]
+            vias = [t for t in tracks if t.GetClass() == "PCB_VIA"]
+            pads = [p for fp in self.board.GetFootprints() for p in fp.Pads()]
+            ends = {}
+            for s in segs:
+                for pt in (s.GetStart(), s.GetEnd()):
+                    k = (s.GetNetCode(), s.GetLayer(), round(mm(pt.x), 3), round(mm(pt.y), 3))
+                    ends.setdefault(k, []).append(s)
+            done = set()
+            changed = False
+            for k, group in ends.items():
+                if len(group) != 2:
+                    continue
+                s1, s2 = group
+                if s1.IsLocked() or s2.IsLocked() or s1.GetWidth() != s2.GetWidth():
+                    continue
+                if id(s1) in done or id(s2) in done:
+                    continue
+                pt = pcbnew.VECTOR2I_MM(k[2], k[3])
+                net = s1.GetNetname()
+                # Joint on a pad, via or T-junction: only merge when the straight segment still
+                # covers the joint (deviation under half the width), so nothing gets disconnected.
+                anchored = (any(v.GetNetCode() == k[0] and v.HitTest(pt) for v in vias)
+                            or any(p.GetNetCode() == k[0] and p.HitTest(pt) for p in pads)
+                            or any(o is not s1 and o is not s2 and o.GetNetCode() == k[0] and o.GetLayer() == k[1]
+                                   and o.HitTest(pt, 0) for o in segs))
+                a = s1.GetEnd() if (round(mm(s1.GetStart().x), 3), round(mm(s1.GetStart().y), 3)) == k[2:] else s1.GetStart()
+                b = s2.GetEnd() if (round(mm(s2.GetStart().x), 3), round(mm(s2.GetStart().y), 3)) == k[2:] else s2.GetStart()
+                ax, ay, bx, by = mm(a.x), mm(a.y), mm(b.x), mm(b.y)
+                vx, vy = bx - ax, by - ay
+                L = math.hypot(vx, vy)
+                if L < 1e-6:
+                    continue
+                dev = abs((k[2] - ax) * vy - (k[3] - ay) * vx) / L
+                if dev > tol or (anchored and dev > 0.4 * mm(s1.GetWidth())):
+                    continue
+                # clearance of the straight replacement against other nets' copper
+                hw = mm(s1.GetWidth()) / 2
+                new = pcbnew.PCB_TRACK(self.board)
+                new.SetStart(a)
+                new.SetEnd(b)
+                new.SetWidth(s1.GetWidth())
+                new.SetLayer(s1.GetLayer())
+                new.SetNet(s1.GetNet())
+                shape = new.GetEffectiveShape(s1.GetLayer())
+                ok = True
+                for o in segs + vias:
+                    if o.GetNetCode() == k[0] or (o.GetClass() != "PCB_VIA" and o.GetLayer() != k[1]):
+                        continue
+                    need = MM(max(clear_of(net), clear_of(o.GetNetname())))
+                    if o.GetEffectiveShape(k[1]).Collide(shape, need):
+                        ok = False
+                        break
+                if ok:
+                    for p in pads:
+                        if p.GetNetCode() == k[0] or not p.IsOnLayer(k[1]):
+                            continue
+                        need = MM(max(clear_of(net), clear_of(p.GetNetname())))
+                        if p.GetEffectiveShape(k[1]).Collide(shape, need):
+                            ok = False
+                            break
+                if not ok:
+                    continue
+                self.board.Remove(s1)
+                self.board.Remove(s2)
+                self.board.Add(new)
+                done.update((id(s1), id(s2)))
+                merged += 1
+                changed = True
+            if not changed:
+                break
+        return merged
+
     def prune_dangling(self, rounds=10):
         """Remove unlocked vias and track stubs that lead nowhere (autorouter leftovers).
 

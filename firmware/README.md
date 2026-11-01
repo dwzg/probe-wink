@@ -42,22 +42,25 @@ ESP-NOW frames, replay protection).
 
 ## Secrets (required at build time)
 
-The build fails unless both are set:
+One secret, the BLE passkey; the build fails without it:
 
-| Variable           | Format              | Used for                                  |
-|--------------------|---------------------|-------------------------------------------|
-| `WINK_ESPNOW_KEY`  | 64 hex chars (32 B) | HMAC key of the master ↔ slave link       |
-| `WINK_BLE_PASSKEY` | 6 digits            | passkey the phone enters when pairing     |
+| Variable           | Format   | Used for                              |
+|--------------------|----------|---------------------------------------|
+| `WINK_BLE_PASSKEY` | 6 digits | passkey the phone enters when pairing |
 
 ```sh
-export WINK_ESPNOW_KEY=$(openssl rand -hex 32)
 export WINK_BLE_PASSKEY=$(python3 -c 'import secrets; print(f"{secrets.randbelow(10**6):06}")')
 ```
 
-Keep both somewhere safe (e.g. a password manager or a git-ignored
-`.envrc`). **Both modules must be flashed from a build with the same key.**
-A key with all bytes equal is rejected at compile time. Changing either value
-triggers a rebuild of `wink-app` only.
+Keep it somewhere safe (a password manager, or the git-ignored
+`firmware/.envrc`, which `make` and `scripts/devkit` read).
+
+The ESP-NOW link key is **not** built in. Both modules run the same image; the
+Android app couples them by writing one random 256-bit key to both over their
+bonded BLE links (Settings → Couple modules). Each module keeps it in NVS and
+reports a fingerprint of it in `STATUS`. Until coupled, a module's radio link
+stays silent and the LH module refuses commands that need the RH module
+(`error: not coupled`). See `wink-app/src/coupling.rs`.
 
 ## Build, test, flash
 
@@ -102,7 +105,7 @@ and `wink-app/sdkconfig.defaults.esp32` is layered on top of the shared defaults
 
 ```sh
 espup install --targets esp32       # once: Xtensa Rust toolchain ("esp") + ~/export-esp.sh
-export WINK_ESPNOW_KEY=... WINK_BLE_PASSKEY=...
+export WINK_BLE_PASSKEY=...
 scripts/devkit build
 scripts/devkit flash /dev/ttyUSB0   # flash + serial monitor (CP2102/CH340 on the devkit)
 ```
@@ -262,7 +265,7 @@ loop on both modules; the idle task is watched too.
 Frames are broadcast and not encrypted (ESP-NOW encryption needs known peer
 MACs and does not cover broadcast). Each 33-byte frame carries sender role,
 epoch and sequence number, and a 16-byte truncated HMAC-SHA256 over the rest,
-keyed with `WINK_ESPNOW_KEY`. The master increments its epoch on every boot
+keyed with the link key from coupling. The master increments its epoch on every boot
 and stores it in NVS; the slave accepts only frames newer than everything
 before and stores the last accepted epoch in NVS, so frames recorded earlier
 are refused after a reboot too. If the master's epoch falls behind (NVS

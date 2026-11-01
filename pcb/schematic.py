@@ -144,7 +144,7 @@ s.text("D1 blocks reverse battery (1 kV), D2 clamps transients; a load dump ends
 s.frame(20.32, 104.14, 53.34, 121.92, "CAR CONNECTOR")
 s.add("J1", "Connector_Generic:Conn_01x06", (35.56, 132.08), "CAR",
       "Connector_Wire:SolderWire-0.5sqmm_1x06_P4.8mm_D0.9mm_OD2.3mm",
-      {"1": "HARN_DOWN", "2": "HARN_UP", "3": "RET_UP", "4": "RET_DOWN", "5": "VBAT_IN", "6": "GND"},
+      {"1": "HARN_DOWN", "2": "RET_UP", "3": "HARN_UP", "4": "RET_DOWN", "5": "VBAT_IN", "6": "GND"},
       mirror=True, fields={**HAND, "MPN": "sheathed 6 x 0.5 mm2 lead (LiYY 6x0.5)"},
       ref_at=(-2.54, -12.7, "center"), val_at=(-2.54, 12.7, "center"))
 for n in (1, 2, 3, 4, 5):
@@ -156,8 +156,8 @@ s.wire((j6[0] + 2.54, j6[1]), (j6[0] + 12.7, j6[1]))
 s.power_flag("GND", (j6[0] + 12.7, j6[1]), direction="down", length=5.08)
 s.text("6-wire lead to the Y-adapter:", 24.13, 160.02, size=1.27, bold=True)
 for i, line in enumerate(["1  BK/BL  harness DOWN (from switch)",
-                          "2  BK/R   harness UP (from switch)",
-                          "3  BK/R   to retractor UP input",
+                          "2  BK/R   to retractor UP input",
+                          "3  BK/R   harness UP (from switch)",
                           "4  BK/BL  to retractor DOWN input",
                           "5  BK/W   +12 V tap (1 A fuse in adapter)",
                           "6  BK     ground tap"]):

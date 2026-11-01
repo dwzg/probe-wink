@@ -41,6 +41,7 @@ Written as text to the command characteristic `7a1e0002-…`, case-insensitive:
 | `FORGET REMOTE` | forget the stored remote                                 |
 | `DRIVELOCK ON`  | refuse winks and alternate while the engine runs (stored; off by default) |
 | `DRIVELOCK OFF` | allow them again                                         |
+| `UNCOUPLE`      | erase the link key (the app's Couple writes a new one)   |
 
 While a wink or alternation runs, everything except `STOP` is refused. LH and RH
 are as seen from the driver's seat.
