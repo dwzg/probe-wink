@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp">
+    <ImageButton
+        android:id="@+id/bar_back"
+        style="@style/IconBtn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:contentDescription="Back"
+        android:src="@drawable/ic_back"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/bar_title"
+        style="@style/T.Title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingStart="12dp"
+        android:textSize="22sp" />
+    <ImageButton
+        android:id="@+id/bar_action2"
+        android:contentDescription="@null"
+        style="@style/IconBtn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:visibility="gone" />
+    <ImageButton
+        android:id="@+id/bar_action"
+        android:contentDescription="@null"
+        style="@style/IconBtn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:visibility="gone" />
+</LinearLayout>

@@ -72,6 +72,8 @@ pub enum Reject {
     NotMine,
     /// Drive lock on and the engine runs (decided by the app, see `voltage::engine_running`).
     EngineRunning,
+    /// Needs the RH module but the modules are not coupled.
+    NotCoupled,
 }
 
 impl Reject {
@@ -83,6 +85,7 @@ impl Reject {
             Reject::Supply(Fault::Undervoltage) => "undervoltage",
             Reject::NotMine => "not a mode command",
             Reject::EngineRunning => "engine running",
+            Reject::NotCoupled => "not coupled",
         }
     }
 }
@@ -144,7 +147,7 @@ impl Controller {
                 self.mode = Mode::Alt { start: now, period, phases };
                 Ok(())
             }
-            Command::PairRemote | Command::ForgetRemote | Command::Status | Command::DriveLock(_) => {
+            Command::PairRemote | Command::ForgetRemote | Command::Status | Command::DriveLock(_) | Command::Uncouple => {
                 Err(Reject::NotMine)
             }
         }

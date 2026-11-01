@@ -38,6 +38,23 @@ class ProtocolTest {
         )
     }
 
+    @Test fun fingerprintMatchesFirmware() {
+        // Same vector as wink-core proto::tests::fingerprint_depends_on_the_key_only.
+        assertEquals("85f7eb12", Protocol.fingerprint(ByteArray(32) { it.toByte() }))
+    }
+
+    @Test fun couplingNotices() {
+        assertEquals(Notice.Link(null), parseNotice("link: not coupled"))
+        assertEquals(Notice.Link("1a2b3c4d", true), parseNotice("link: coupled 1a2b3c4d rh-ok"))
+        assertEquals(Notice.Link("1a2b3c4d", false), parseNotice("link: coupled 1a2b3c4d rh-silent"))
+        assertEquals(Notice.Link("1a2b3c4d", null), parseNotice("link: coupled 1a2b3c4d"))
+        assertEquals(Notice.SideIs(Side.RH), parseNotice("side: rh"))
+        assertEquals(Side.LH, Protocol.sideOf("PWink-L"))
+        assertEquals(Side.RH, Protocol.sideOf("ProbeWink RH"))
+        assertEquals(null, Protocol.sideOf("PWink"))
+        assertTrue(Protocol.isModuleName("PWink-R"))
+    }
+
     @Test fun unknown() {
         assertTrue(parseNotice("hello") is Notice.Unknown)
     }

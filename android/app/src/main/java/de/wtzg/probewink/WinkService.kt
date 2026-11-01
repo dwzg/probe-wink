@@ -17,7 +17,7 @@ import android.os.Looper
 /**
  * Owns the Bluetooth link. Widgets, the app and the notification send it intents:
  * RUN (a command), CONNECT, DISCONNECT. It runs as a short-lived foreground service
- * (type connectedDevice): connect, send, stay connected [IDLE_MS] after the last
+ * (type connectedDevice): connect, send, stay connected (Settings, default 90 s) after the last
  * command so follow-up taps are instant, then disconnect and stop.
  *
  * Widget taps may start a foreground service from the background on Android 12+
@@ -32,7 +32,6 @@ class WinkService : Service(), WinkLink.Events {
         const val EXTRA_COMMAND = "command"
         private const val CHANNEL = "link"
         private const val NOTIFICATION_ID = 1
-        private const val IDLE_MS = 90_000L
 
         fun intent(context: Context, action: String, command: String? = null): Intent =
             Intent(context, WinkService::class.java).setAction(action).apply {
@@ -101,7 +100,7 @@ class WinkService : Service(), WinkLink.Events {
             }
         }
         main.removeCallbacks(idle)
-        main.postDelayed(idle, IDLE_MS)
+        main.postDelayed(idle, Store.keepAliveSeconds * 1000L)
         return START_NOT_STICKY
     }
 

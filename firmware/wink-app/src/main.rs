@@ -15,6 +15,7 @@ use wink_core::Millis;
 
 mod ble_phone;
 mod ble_remote;
+mod coupling;
 mod hw;
 mod link;
 mod master;
@@ -37,6 +38,8 @@ pub enum Event {
     RemoteInfo(&'static str),
     /// ESP-NOW frame (not yet authenticated).
     Radio(Vec<u8>),
+    /// New link key written by the phone (coupling).
+    LinkKey(wink_core::proto::Key),
 }
 
 /// Milliseconds since boot.
@@ -77,20 +80,23 @@ fn main() -> anyhow::Result<()> {
     let nvs = EspDefaultNvsPartition::take()?;
     let mut store = store::Store::new(nvs.clone())?;
     let (tx, rx) = sync_channel::<Event>(32);
+    let key = store.link_key();
+    info!("{}", coupling::link_line(key.as_ref()));
 
     match side {
         hw::Side::Lh => {
             let counter = Counter::new(Role::Master, store.next_tx_epoch());
-            let link = link::Link::start(p.modem, sysloop, nvs.clone(), counter, tx.clone())?;
-            let phone = ble_phone::start(tx.clone())?;
+            let link = link::Link::start(p.modem, sysloop, nvs.clone(), counter, key, tx.clone())?;
+            let phone = ble_phone::start(tx.clone(), side)?;
             let remote = Arc::new(ble_remote::RemoteCtl::default());
             ble_remote::spawn(remote.clone(), nvs, tx)?;
             master::Master { board, link, phone, remote, store, events: rx }.run(&mut wdt)
         }
         hw::Side::Rh => {
             let counter = Counter::new(Role::Slave, store.next_tx_epoch());
-            let link = link::Link::start(p.modem, sysloop, nvs, counter, tx)?;
-            slave::Slave { board, link, store, events: rx }.run(&mut wdt)
+            let link = link::Link::start(p.modem, sysloop, nvs, counter, key, tx.clone())?;
+            let phone = ble_phone::start(tx, side)?;
+            slave::Slave { board, link, phone, store, events: rx }.run(&mut wdt)
         }
     }
 }

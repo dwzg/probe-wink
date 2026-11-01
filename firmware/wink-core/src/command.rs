@@ -49,12 +49,19 @@ pub enum Command {
     Status,
     /// Refuse lamp movement while the engine runs (stored on the module).
     DriveLock(bool),
+    /// Erase the link key (the modules stop talking until coupled again).
+    Uncouple,
 }
 
 impl Command {
     /// Does this command move a lamp? (What the drive lock refuses; STOP never.)
     pub const fn moves_lamps(self) -> bool {
         matches!(self, Command::Wink(_) | Command::Alt { .. })
+    }
+
+    /// Does this command need the RH module (so a coupled link)?
+    pub const fn needs_rh(self) -> bool {
+        matches!(self, Command::Wink(Side::Right) | Command::Wink(Side::Both) | Command::Alt { .. })
     }
 }
 
@@ -127,7 +134,8 @@ pub fn parse(input: &[u8], alt_default_s: u32) -> Result<Command, ParseError> {
         ("FORGET", Some("REMOTE")) => Ok(Command::ForgetRemote),
         ("DRIVELOCK", Some("ON")) => Ok(Command::DriveLock(true)),
         ("DRIVELOCK", Some("OFF")) => Ok(Command::DriveLock(false)),
-        ("STOP" | "STATUS" | "PAIR" | "FORGET" | "DRIVELOCK", _) => Err(ParseError::BadArgument),
+        ("UNCOUPLE", None) => Ok(Command::Uncouple),
+        ("STOP" | "STATUS" | "PAIR" | "FORGET" | "DRIVELOCK" | "UNCOUPLE", _) => Err(ParseError::BadArgument),
         _ => Err(ParseError::Unknown),
     }
 }
@@ -208,6 +216,13 @@ mod tests {
         assert!(Command::Alt { secs: 8 }.moves_lamps());
         assert!(!Command::Stop.moves_lamps());
         assert!(!Command::DriveLock(true).moves_lamps());
+        assert_eq!(p("UNCOUPLE"), Ok(Command::Uncouple));
+        assert_eq!(p("UNCOUPLE NOW"), Err(ParseError::BadArgument));
+        assert!(!Command::Wink(Side::Left).needs_rh());
+        assert!(Command::Wink(Side::Right).needs_rh());
+        assert!(Command::Wink(Side::Both).needs_rh());
+        assert!(Command::Alt { secs: 3 }.needs_rh());
+        assert!(!Command::Stop.needs_rh());
         assert_eq!(p("HONK"), Err(ParseError::Unknown));
     }
 

@@ -15,15 +15,17 @@ use esp_idf_svc::sys::{self, EspError};
 use esp_idf_svc::wifi::{ClientConfiguration, Configuration, WifiDriver};
 use log::{info, warn};
 use wink_core::config::ESPNOW_CHANNEL;
-use wink_core::proto::{self, Counter, Message};
+use wink_core::proto::{self, Counter, Key, Message};
 
-use crate::secrets::ESPNOW_KEY;
 use crate::Event;
 
 pub struct Link {
     _wifi: WifiDriver<'static>,
     now: EspNow<'static>,
     counter: Counter,
+    /// None until the phone couples the modules: then nothing is sent and
+    /// received frames are ignored.
+    key: Option<Key>,
 }
 
 impl Link {
@@ -34,6 +36,7 @@ impl Link {
         sysloop: EspSystemEventLoop,
         nvs: EspDefaultNvsPartition,
         counter: Counter,
+        key: Option<Key>,
         events: SyncSender<Event>,
     ) -> Result<Self, EspError> {
         let mut wifi = WifiDriver::new(modem, sysloop, Some(nvs))?;
@@ -59,11 +62,19 @@ impl Link {
             }
         })?;
         info!("ESP-NOW up on channel {ESPNOW_CHANNEL}, epoch {}", counter.epoch());
-        Ok(Self { _wifi: wifi, now, counter })
+        if key.is_none() {
+            info!("ESP-NOW: not coupled, link silent until the phone couples the modules");
+        }
+        Ok(Self { _wifi: wifi, now, counter, key })
+    }
+
+    pub fn key(&self) -> Option<&Key> {
+        self.key.as_ref()
     }
 
     pub fn send(&mut self, msg: Message) {
-        let frame = proto::encode(&ESPNOW_KEY, self.counter.next(), msg);
+        let Some(key) = self.key else { return };
+        let frame = proto::encode(&key, self.counter.next(), msg);
         if let Err(e) = self.now.send(BROADCAST, &frame) {
             warn!("ESP-NOW send {msg:?} failed: {e}");
         }

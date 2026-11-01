@@ -3,6 +3,7 @@
 use esp_idf_svc::nvs::{EspDefaultNvs, EspDefaultNvsPartition};
 use esp_idf_svc::sys::EspError;
 use log::warn;
+use wink_core::proto::{Key, KEY_LEN};
 
 const NS: &str = "wink";
 /// Epoch this module last used for its own frames.
@@ -13,6 +14,8 @@ const RX_EPOCH: &str = "rx_epoch";
 const REMOTE: &str = "remote";
 /// u8: 1 = refuse lamp movement while the engine runs.
 const DRIVE_LOCK: &str = "drivelock";
+/// blob, 32 bytes: ESP-NOW link key.
+const LINK_KEY: &str = "linkkey";
 
 pub struct Store {
     nvs: EspDefaultNvs,
@@ -43,6 +46,25 @@ impl Store {
     pub fn set_rx_epoch(&mut self, e: u32) {
         if let Err(err) = self.nvs.set_u32(RX_EPOCH, e) {
             warn!("NVS write rx_epoch failed: {err}");
+        }
+    }
+
+    /// ESP-NOW link key, written by the phone when coupling (`coupling.rs`).
+    pub fn link_key(&self) -> Option<Key> {
+        let mut buf = [0u8; KEY_LEN];
+        match self.nvs.get_blob(LINK_KEY, &mut buf) {
+            Ok(Some(b)) if b.len() == KEY_LEN => Some(buf),
+            _ => None,
+        }
+    }
+
+    pub fn set_link_key(&mut self, key: Option<Key>) {
+        let r = match key {
+            Some(k) => self.nvs.set_blob(LINK_KEY, &k),
+            None => self.nvs.remove(LINK_KEY).map(|_| ()),
+        };
+        if let Err(err) = r {
+            warn!("NVS: link key not saved: {err}");
         }
     }
 

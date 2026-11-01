@@ -6,6 +6,7 @@ use std::time::Duration;
 use esp_idf_svc::hal::task::watchdog::WatchdogSubscription;
 use log::{info, warn};
 use wink_core::awake::AwakeTimer;
+use wink_core::command::{self, Command};
 use wink_core::config::{SUPPLY, TIMING};
 use wink_core::proto::{self, Freshness, Message, ReplayGuard, Role, SupplyState};
 use wink_core::safety::{HeartbeatWatchdog, OnTimeLimiter};
@@ -14,7 +15,9 @@ use wink_core::Millis;
 
 use crate::hw::Board;
 use crate::link::Link;
-use crate::secrets::ESPNOW_KEY;
+use crate::ble_phone::Phone;
+use crate::coupling;
+use crate::hw::Side;
 use crate::store::Store;
 use crate::{millis, sleep, Event};
 
@@ -25,6 +28,7 @@ const STALE_REPLY_MS: Millis = 1000;
 pub struct Slave {
     pub board: Board,
     pub link: Link,
+    pub phone: Phone,
     pub store: Store,
     pub events: Receiver<Event>,
 }
@@ -59,8 +63,21 @@ impl Slave {
             let mut status_requested = false;
 
             for ev in frames {
-                let Event::Radio(frame) = ev else { continue };
-                let Ok((h, msg)) = proto::decode(&ESPNOW_KEY, &frame) else {
+                let frame = match ev {
+                    Event::Radio(f) => f,
+                    Event::PhoneWrite(data) => {
+                        awake.activity(now);
+                        self.phone_command(&data);
+                        continue;
+                    }
+                    Event::LinkKey(k) => {
+                        coupling::apply_key(&mut self.store, &self.phone, k);
+                        continue;
+                    }
+                    _ => continue,
+                };
+                let Some(key) = self.link.key().copied() else { continue };
+                let Ok((h, msg)) = proto::decode(&key, &frame) else {
                     continue; // not ours, or forged
                 };
                 if h.sender != Role::Master {
@@ -106,6 +123,9 @@ impl Slave {
             }
             let on = want && supply.permits(now, self.board.relay_on());
             let on = limit.apply(now, on);
+            if on != self.board.relay_on() {
+                self.phone.set_state(if on { "wink" } else { "idle" });
+            }
             self.board.set_relay(on);
             self.board.set_led(on);
 
@@ -125,6 +145,22 @@ impl Slave {
                 hb.clear();
                 sleep::enter(&mut self.board);
             }
+        }
+    }
+
+    /// The RH module only answers STATUS and UNCOUPLE; everything else goes to
+    /// the LH module.
+    fn phone_command(&mut self, data: &[u8]) {
+        match command::parse(data, TIMING.alt_default_s) {
+            Ok(Command::Status) => {
+                self.phone.set_state(if self.board.relay_on() { "wink" } else { "idle" });
+                self.phone.reply(coupling::side_line(Side::Rh));
+                self.phone.reply(&coupling::link_line(self.link.key()));
+                self.phone.reply(concat!("version: ", env!("CARGO_PKG_VERSION")));
+            }
+            Ok(Command::Uncouple) => coupling::uncouple(&mut self.store, &self.phone),
+            Ok(_) => self.phone.reply("error: use the LH module"),
+            Err(e) => self.phone.reply(&format!("error: {}", e.as_str())),
         }
     }
 }

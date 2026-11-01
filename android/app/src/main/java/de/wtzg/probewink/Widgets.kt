@@ -65,10 +65,9 @@ class ActionWidget : AppWidgetProvider() {
             val action = Store.widgetAction(id)
             val v = RemoteViews(context.packageName, R.layout.widget_action)
             v.setTextViewText(R.id.w_action, action.label)
-            v.setInt(
-                R.id.w_action, "setBackgroundResource",
-                if (action == Action.STOP) R.drawable.btn_stop else R.drawable.btn_primary,
-            )
+            val stop = action == Action.STOP
+            v.setInt(R.id.w_action, "setBackgroundResource", if (stop) R.drawable.btn_stop else R.drawable.btn_primary)
+            v.setTextColor(R.id.w_action, context.getColor(if (stop) R.color.on_danger_soft else R.color.on_accent))
             // requestCode per widget: two widgets with different actions need distinct intents.
             v.setOnClickPendingIntent(R.id.w_action, WinkService.pending(context, action, 1000 + id))
             return v

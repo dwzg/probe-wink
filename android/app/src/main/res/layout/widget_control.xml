@@ -78,7 +78,7 @@
             android:background="@drawable/btn_stop"
             android:gravity="center"
             android:text="Stop"
-            android:textColor="@color/on_accent"
+            android:textColor="@color/on_danger_soft"
             android:textSize="15sp"
             android:textStyle="bold" />
     </LinearLayout>

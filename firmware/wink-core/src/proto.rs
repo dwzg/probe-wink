@@ -140,6 +140,16 @@ fn allowed(sender: Role, msg: &Message) -> bool {
     }
 }
 
+/// Short, non-secret identifier of a link key: the first 4 bytes of
+/// HMAC-SHA256(key, "probe-wink fingerprint"). Lets the phone check that both
+/// modules hold the same key without reading the key back.
+pub fn fingerprint(key: &Key) -> [u8; 4] {
+    let mut m = <Hmac<Sha256> as Mac>::new_from_slice(key).expect("any key length");
+    m.update(b"probe-wink fingerprint");
+    let t = m.finalize().into_bytes();
+    [t[0], t[1], t[2], t[3]]
+}
+
 /// Build a frame.
 pub fn encode(key: &Key, h: Header, msg: Message) -> [u8; FRAME_LEN] {
     let mut f = [0u8; FRAME_LEN];
@@ -474,5 +484,18 @@ mod tests {
     #[should_panic]
     fn key_parsing_rejects_non_hex() {
         parse_key_hex("zz0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
+    }
+
+    #[test]
+    fn fingerprint_depends_on_the_key_only() {
+        let a = [7u8; KEY_LEN];
+        let mut b = a;
+        b[31] ^= 1;
+        assert_eq!(fingerprint(&a), fingerprint(&a));
+        assert_ne!(fingerprint(&a), fingerprint(&b));
+        // Shared test vector with the Android app (ProtocolTest.fingerprintMatchesFirmware),
+        // computed independently with Python's hmac module.
+        let k: Key = core::array::from_fn(|i| i as u8);
+        assert_eq!(fingerprint(&k), [0x85, 0xf7, 0xeb, 0x12]);
     }
 }

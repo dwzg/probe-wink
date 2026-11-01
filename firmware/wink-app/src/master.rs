@@ -20,7 +20,8 @@ use crate::ble_phone::Phone;
 use crate::ble_remote::RemoteCtl;
 use crate::hw::Board;
 use crate::link::Link;
-use crate::secrets::ESPNOW_KEY;
+use crate::coupling;
+use crate::hw::Side;
 use crate::store::Store;
 use crate::{millis, sleep, Event};
 
@@ -53,6 +54,8 @@ struct State {
     remote_up: bool,
     /// Refuse winks / ALT while the engine runs (NVS).
     drive_lock: bool,
+    /// Last authenticated status frame from the RH module.
+    slave_seen: Option<Millis>,
 }
 
 impl Master {
@@ -72,6 +75,7 @@ impl Master {
             last_status: None,
             remote_up: false,
             drive_lock: self.store.drive_lock(),
+            slave_seen: None,
         };
         self.link.send(Message::Ping);
 
@@ -188,6 +192,7 @@ impl Master {
                 self.phone.reply(text);
             }
             Event::Radio(frame) => self.radio(st, now, &frame),
+            Event::LinkKey(k) => coupling::apply_key(&mut self.store, &self.phone, k),
         }
     }
 
@@ -200,6 +205,22 @@ impl Master {
                 self.phone.reply(if st.remote_up { "remote: connected" } else { "remote: disconnected" });
                 self.phone.reply(concat!("version: ", env!("CARGO_PKG_VERSION")));
                 self.phone.reply(if st.drive_lock { "drivelock: on" } else { "drivelock: off" });
+                self.phone.reply(coupling::side_line(Side::Lh));
+                let rh = match st.slave_seen {
+                    Some(t) if now.saturating_sub(t) <= SLAVE_STATUS_TTL_MS => " rh-ok",
+                    _ => " rh-silent",
+                };
+                let link = coupling::link_line(self.link.key());
+                if self.link.key().is_some() {
+                    self.phone.reply(&(link + rh));
+                } else {
+                    self.phone.reply(&link);
+                }
+            }
+            Command::Uncouple => coupling::uncouple(&mut self.store, &self.phone),
+            c if c.needs_rh() && self.link.key().is_none() => {
+                info!("{c:?} refused: not coupled");
+                self.phone.reply(&format!("error: {}", Reject::NotCoupled.as_str()));
             }
             Command::DriveLock(on) => {
                 st.drive_lock = on;
@@ -230,7 +251,8 @@ impl Master {
     }
 
     fn radio(&mut self, st: &mut State, now: Millis, frame: &[u8]) {
-        let Ok((h, msg)) = proto::decode(&ESPNOW_KEY, frame) else {
+        let Some(key) = self.link.key().copied() else { return };
+        let Ok((h, msg)) = proto::decode(&key, frame) else {
             return; // not ours, or forged
         };
         if h.sender != Role::Slave {
@@ -247,6 +269,7 @@ impl Master {
                 }
             }
             Message::Status { relay_on, limit_tripped, supply } => {
+                st.slave_seen = Some(now);
                 info!("slave: relay={relay_on} limit={limit_tripped} supply={supply:?}");
                 st.slave_fault = match supply {
                     SupplyState::Ok => None,
