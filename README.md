@@ -48,10 +48,14 @@ retractor sends that lamp the opposite way. Details:
 | `enclosure/`    | 3D-printable housing in build123d (`housing.py`, `check.py`, `render.py`) |
 | `firmware/`     | Rust on ESP-IDF for the ESP32-C3; [README](firmware/README.md) |
 | `android/`      | Android app with home-screen widgets; [README](android/README.md) |
-| `tools/kicad/`  | generic KiCad generator library used by `pcb/`               |
+| `tools/hw-design/` | submodule: [hw-design](https://github.com/dwzg/hw-design), the KiCad and build123d library used by `pcb/` and `enclosure/` |
 | `Makefile`      | one target per part                                          |
 
 ## Quick start
+
+The board and housing generators use the [hw-design](https://github.com/dwzg/hw-design)
+library as a submodule. Clone with `git clone --recurse-submodules`, or run
+`git submodule update --init` in an existing clone.
 
 ```sh
 make pcb         # schematic -> ERC/netlist check -> board (route, DRC, layout checks) -> JLCPCB files
@@ -81,7 +85,7 @@ the Rust toolchain): [docs/building.md](docs/building.md).
 
 ## Licence
 
-- **Software** (`firmware/`, `android/`, `tools/`, and the generator scripts in
+- **Software** (`firmware/`, `android/`, and the generator scripts in
   `pcb/` and `enclosure/`): [MIT](LICENSE).
 - **Hardware design** (the KiCad files in `pcb/`, the housing models built by
   `enclosure/`): [CERN-OHL-P-2.0](LICENSE-HARDWARE), the permissive CERN Open

@@ -8,9 +8,9 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "tools"))
+sys.path.insert(0, os.path.join(HERE, "..", "tools", "hw-design", "src"))
 import pcbnew  # noqa: E402
-from kicad.board import Board, acute_angles, drc, foreign_copper, narrow_tracks, path_length, render  # noqa: E402
+from hwdesign.kicad.board import Board, acute_angles, drc, foreign_copper, narrow_tracks, path_length, render  # noqa: E402
 
 BUILD = os.path.join(HERE, "build")
 PCB = os.path.join(HERE, "probe-wink.kicad_pcb")

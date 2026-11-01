@@ -12,8 +12,8 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "tools"))
-from kicad.schematic import Schematic  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, "..", "tools", "hw-design", "src"))
+from hwdesign.kicad.schematic import Schematic  # noqa: E402
 
 R0805 = "Resistor_SMD:R_0805_2012Metric"
 C0805 = "Capacitor_SMD:C_0805_2012Metric"

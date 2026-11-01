@@ -4,8 +4,8 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "tools"))
-from kicad.fab import export  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, "..", "tools", "hw-design", "src"))
+from hwdesign.kicad.fab import export  # noqa: E402
 
 # JLC's placement rotation can differ from KiCad's per footprint. Check every part in
 # JLC's placement preview; add corrections here as found. Degrees, counter-clockwise,

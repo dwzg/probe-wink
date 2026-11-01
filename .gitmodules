@@ -1,0 +1,3 @@
+[submodule "tools/hw-design"]
+	path = tools/hw-design
+	url = https://github.com/dwzg/hw-design

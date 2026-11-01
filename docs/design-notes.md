@@ -119,7 +119,7 @@ RH relay drop within 1 s.
 ## Generated design files
 
 The schematic, board, fab outputs and housing are all generated from Python
-(`pcb/*.py`, `enclosure/housing.py`, using the generic library in
-`tools/kicad/`). Every value lives in one place, each run repeats ERC, the
+(`pcb/*.py`, `enclosure/housing.py`, using the generic library
+[hw-design](https://github.com/dwzg/hw-design), pinned as the submodule `tools/hw-design/`). Every value lives in one place, each run repeats ERC, the
 netlist comparison, DRC, the layout checks and the housing checks, and a
 change is a reviewable diff.

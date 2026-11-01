@@ -10,107 +10,25 @@ the lid FE (grillage + gasket springs), gasket force, mass and print time are es
   enclosure/.venv/bin/python enclosure/check.py --sweep    # lid FE for other screw counts / lid
 """
 import math
+import os
 import sys
 
 import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.linalg as spla
-from scipy import ndimage
+from build123d import Align, Box, Compound, Cylinder, Plane, Pos
 
-import housing as hs
-from build123d import Align, Box, Compound, Cylinder, Plane, Pos, Vector
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "hw-design", "src"))
+import housing as hs  # noqa: E402
+from hwdesign.mcad.gasket import gasket_cord, gasket_tpu  # noqa: E402
+from hwdesign.mcad.printing import mass_time, overhangs  # noqa: E402
+from hwdesign.mcad.probe import columns, edge_along, inside  # noqa: E402
 
 ROWS = []
 
 
 def row(name, ok, measured, required, kind="V"):
     ROWS.append((name, ok, measured, required, kind))
-
-
-# ---------------------------------------------------------------- geometry helpers
-def inside(shape, p):
-    return shape.is_inside(Vector(*p), 1e-4)
-
-
-def edge_along(shape, p, d, smax, inside_start):
-    """Distance from p along unit vector d to the first change of material state (bisection
-    after a coarse 0.05 mm scan)."""
-    p, d = np.array(p, float), np.array(d, float)
-    step, t = 0.05, 0.0
-    while t < smax:
-        if inside(shape, p + (t + step) * d) != inside_start:
-            lo, hi = t, t + step
-            for _ in range(12):
-                m = (lo + hi) / 2
-                if inside(shape, p + m * d) == inside_start:
-                    lo = m
-                else:
-                    hi = m
-            return (lo + hi) / 2
-        t += step
-    return smax
-
-
-def tess(shape, tol=0.03):
-    v, t = shape.tessellate(tol, 0.2)
-    return np.array([(q.X, q.Y, q.Z) for q in v]), np.array(t)
-
-
-def columns(shape, x0, y0, nx, ny, d, tol=0.03):
-    """Vertical ray casts on a grid: returns {(i, j): [(z_in, z_out), ...]}."""
-    V, T = tess(shape, tol)
-    hits = {}
-    ox, oy = x0 + 0.00123, y0 + 0.00171            # avoid rays through mesh edges
-    for tri in V[T]:
-        (ax, ay, az), (bx, by, bz), (cx, cy, cz) = tri
-        den = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy)
-        if abs(den) < 1e-12:
-            continue
-        i0 = max(int(math.ceil((min(ax, bx, cx) - ox) / d)), 0)
-        i1 = min(int(math.floor((max(ax, bx, cx) - ox) / d)), nx - 1)
-        j0 = max(int(math.ceil((min(ay, by, cy) - oy) / d)), 0)
-        j1 = min(int(math.floor((max(ay, by, cy) - oy) / d)), ny - 1)
-        if i1 < i0 or j1 < j0:
-            continue
-        I, J = np.meshgrid(np.arange(i0, i1 + 1), np.arange(j0, j1 + 1), indexing="ij")
-        px, py = ox + I * d, oy + J * d
-        l1 = ((by - cy) * (px - cx) + (cx - bx) * (py - cy)) / den
-        l2 = ((cy - ay) * (px - cx) + (ax - cx) * (py - cy)) / den
-        l3 = 1 - l1 - l2
-        m = (l1 >= 0) & (l2 >= 0) & (l3 >= 0)
-        z = l1 * az + l2 * bz + l3 * cz
-        for i, j, zz in zip(I[m], J[m], z[m]):
-            hits.setdefault((int(i), int(j)), []).append(float(zz))
-    out = {}
-    for k, zs in hits.items():
-        zs = sorted(zs)
-        if len(zs) % 2:
-            zs = zs[:-1]
-        out[k] = [(zs[n], zs[n + 1]) for n in range(0, len(zs), 2) if zs[n + 1] - zs[n] > 1e-4]
-    return out
-
-
-def leaf_parts(pcb):
-    kids = list(pcb.children)
-    while len(kids) == 1:
-        kids = list(kids[0].children)
-    board_solid = [k for k in kids if str(k.label).endswith("_PCB")][0]
-    return board_solid, [k for k in kids if not str(k.label).endswith("_PCB")]
-
-
-# ---------------------------------------------------------------- gasket models (est.)
-def shore_to_E(sh):
-    """Gent's relation, Shore A -> Young's modulus (MPa)."""
-    return 0.0981 * (56 + 7.62336 * sh) / (0.137505 * (254 - 2.54 * sh))
-
-
-def lindley(eps):
-    """O-ring/cord line force per (E * d), Lindley 1967."""
-    return 1.25 * eps ** 1.5 + 50 * eps ** 6
-
-
-def lindley_d(eps):
-    return 1.875 * eps ** 0.5 + 300 * eps ** 5
 
 
 # ---------------------------------------------------------------- lid FE (grillage, est.)
@@ -263,74 +181,6 @@ def lid_fe(h, gasket, f_nub=14.0, E=1600.0, nu=0.35, hn=2.0, ds=0.5, cols=None, 
     return dict(w_max=float(wl.max()), w_min=float(wl.min()), wl=wl, gpts=gpts, nodes=n,
                 f_gasket=float(sum(gasket(x)[0] * seg for x in wl)), it=it,
                 screws_load=None, cols=cols, land=land)
-
-
-def gasket_cord(d, shore, D):
-    E = shore_to_E(shore)
-    s0 = d - D
-
-    def f(w):
-        dl = s0 - w
-        if dl <= 0:
-            return 0.0, 0.0
-        e = dl / d
-        return E * d * lindley(e), E * lindley_d(e)
-    return f, s0
-
-
-def gasket_tpu(b, h0, D, E=26.0, nu=0.48):
-    Ep = E / (1 - nu * nu)
-    s0 = h0 - D
-
-    def f(w):
-        dl = s0 - w
-        if dl <= 0:
-            return 0.0, 0.0
-        return b * Ep * dl / h0, b * Ep / h0
-    return f, s0
-
-
-# ---------------------------------------------------------------- mass / time (est.)
-def mass_time(shape, rho=1.07, walls=2.4, tops=1.2, infill=0.25, vox=0.4):
-    bb = shape.bounding_box()
-    nx, ny = int(bb.size.X / vox) + 3, int(bb.size.Y / vox) + 3
-    cols = columns(shape, bb.min.X - vox, bb.min.Y - vox, nx, ny, vox, tol=0.05)
-    nz = int(bb.size.Z / (vox / 2)) + 3
-    vol = np.zeros((nx, ny, nz), bool)
-    zc = bb.min.Z - vox / 2 + (np.arange(nz) + 0.5) * vox / 2
-    for (i, j), iv in cols.items():
-        for za, zb in iv:
-            vol[i, j, (zc > za) & (zc < zb)] = True
-    # anisotropic: z distances scaled so that 'tops' mm counts like 'walls' mm
-    dist = ndimage.distance_transform_edt(vol, sampling=(vox, vox, vox / 2 * walls / tops))
-    v_vox = vox * vox * vox / 2
-    v_all = vol.sum() * v_vox
-    v_core = (dist > walls).sum() * v_vox
-    v_print = v_all - v_core * (1 - infill)
-    layers = bb.size.Z / 0.2
-    t_s = (v_all - v_core) / 4.0 + v_core * infill / 8.0 + layers * 2.0    # 4 / 8 mm3/s, 2 s/layer
-    return dict(v_solid=shape.volume / 1000, v_vox=v_all / 1000, v_print=v_print / 1000,
-                g=v_print / 1000 * rho, t_h=t_s / 3600)
-
-
-# ---------------------------------------------------------------- overhangs (print orientation)
-def overhangs(shape, flip=False, nz_lim=-0.75):
-    V, T = tess(shape, 0.05)
-    if flip:
-        V = V * np.array([1, -1, -1])
-    V[:, 2] -= V[:, 2].min()
-    tri = V[T]
-    n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
-    area = np.linalg.norm(n, axis=1) / 2
-    nzu = n[:, 2] / (np.linalg.norm(n, axis=1) + 1e-12)
-    zmin = tri[:, :, 2].min(axis=1)
-    m = (nzu < nz_lim) & (zmin > 0.05) & (area > 0)
-    cen = tri[m].mean(axis=1)
-    clusters = {}
-    for c, a in zip(cen, area[m]):
-        k = (round(c[0] / 6) * 6, round(c[1] / 6) * 6, round(c[2], 1))
-        clusters[k] = clusters.get(k, 0) + a
-    return float(area[m].sum()), sorted(clusters.items(), key=lambda kv: -kv[1])
 
 
 # ================================================================ main

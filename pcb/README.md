@@ -16,7 +16,7 @@ The KiCad files are **generated**. Edit the Python sources, not the `.kicad_*` f
 | `fab.py` | JLCPCB Gerber/drill zip, BOM, CPL, assembly drawings → `build/fab/` |
 | `export_enclosure.py` | Board STEP and geometry JSON for the housing → `../enclosure/build/` |
 | `lib/probe-wink.pretty` | Project footprints (back-side pogo pads for J2) |
-| `../tools/kicad/` | Generic generator library (`sexp`, `schematic`, `board`, `fab`, `geometry`) |
+| `../tools/hw-design/` | Submodule: the generic generator library [hw-design](https://github.com/dwzg/hw-design) (`hwdesign.kicad`) |
 
 ## Rebuild
 
@@ -70,7 +70,7 @@ buck and the module behave, and the autorouter only does the rest:
   bus, MOSFET, pull-up), placed next to the harness pads.
 
 After routing, `board.py` measures the routed copper between pad pairs
-(`kicad.board.path_length`) and fails loudly if a limit is exceeded:
+(`hwdesign.kicad.board.path_length`) and fails loudly if a limit is exceeded:
 
 | Path | Rev B | Rev C | Limit |
 |---|---|---|---|

@@ -8,8 +8,8 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "tools"))
-from kicad.geometry import export  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, "..", "tools", "hw-design", "src"))
+from hwdesign.kicad.geometry import export  # noqa: E402
 
 PCB = os.path.join(HERE, "probe-wink.kicad_pcb")
 OUT = os.path.join(HERE, "..", "enclosure", "build")
