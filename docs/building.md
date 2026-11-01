@@ -35,7 +35,8 @@ Ordering at JLCPCB: 2-layer board, 46 × 40 mm, top-side assembly of every part
 marked `Assembly = SMT` (45 placements, 26 BOM lines). Order at least two.
 
 - Check every part's rotation in JLC's placement preview. Record corrections in
-  `ROT_OFFSET` in `pcb/fab.py` and regenerate.
+  `ROT_OFFSET` in `pcb/fab.py` and regenerate. Already corrected (found in the
+  preview, 2026-11-01): SOT-23 and TSOT-23-6 by 180° (Q1–Q3, U1), the relay K1 by 90°.
 - The ESP32-C3-WROOM-02-N4 is rated −40…85 °C ambient. The -H4 (105 °C, LCSC
   C2944070) has the same pads but showed no stock at JLC on 2026-11-01;
   consider it for a hot mounting spot.

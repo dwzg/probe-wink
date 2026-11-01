@@ -124,7 +124,8 @@ After routing, `board.py` measures the routed copper between pad pairs
 ## Review before ordering
 
 - Check every part's rotation in JLC's placement preview; record corrections in
-  `ROT_OFFSET` in `fab.py`.
+  `ROT_OFFSET` in `fab.py`. Already corrected: SOT-23 and TSOT-23-6 by 180° (Q1–Q3, U1),
+  the relay K1 by 90°.
 - The ESP32-C3-WROOM-02-N4 is rated −40…85 °C ambient. The -H4 (105 °C, LCSC
   C2944070) has the same pads but showed 0 stock at JLC; consider it for a hot
   mounting spot.
